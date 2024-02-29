@@ -178,7 +178,6 @@ Dane testowe powinny być różnorodne (wycieczki w przyszłości, wycieczki w p
 
 W razie potrzeby należy zmodyfikować dane tak żeby przetestować różne przypadki.
 
-
 ```sql
 -- trip
 insert into trip(trip_name, country, trip_date, max_no_places)  
@@ -241,10 +240,49 @@ pomocne mogą być materiały dostępne tu:
 https://upel.agh.edu.pl/mod/folder/view.php?id=214774
 w szczególności dokument: `1_modyf.pdf`
 
-
+## DODAŁEM o jedną rezerwację za dużo :(
 ```sql
+-- person
+insert into person(firstname, lastname)
+values ('Ala', 'Nowakowska');
 
--- przyklady, kod, zrzuty ekranów, komentarz ...
+insert into person(firstname, lastname)
+values ('Jan', 'Kowalski');
+
+insert into person(firstname, lastname)
+values ('Anna', 'Kowalczyk');
+
+insert into person(firstname, lastname)
+values  ('Katarzyna', 'Wojciechowska');
+
+insert into person(firstname, lastname)
+values ('Andrzej ', 'Kaczmarek');
+
+insert into person(firstname, lastname)
+values  ('Marek ', 'Kwiatkowski');
+
+-- reservation
+-- trip 1
+insert  into reservation(trip_id, person_id, status)
+values (1, 5, 'N');
+
+-- trip 2
+insert into reservation(trip_id, person_id, status)
+values (2, 9, 'C');
+
+-- trip 3
+insert into reservation(trip_id, person_id, status)
+values (4, 10, 'N');
+
+-- trip 4
+insert into reservation(trip_id, person_id, status)
+values (4, 7, 'C');
+
+insert into reservation(trip_id, person_id, status)
+values (4, 2, 'C');
+
+insert into reservation(trip_id, person_id, status)
+values (4, 8, 'P');
 
 ```
 
@@ -273,10 +311,33 @@ Proponowany zestaw widoków można rozbudować wedle uznania/potrzeb
 
 ```sql
 
--- wyniki, kod, zrzuty ekranów, komentarz ...
+create view vw_reservation as
+select reservation_id, country, trip_date, trip_name, firstname, lastname, status, r.trip_id, r.person_id  from reservation r
+join trip t on t.TRIP_ID = r.TRIP_ID
+join person p on p.PERSON_ID = r.PERSON_ID
 
 
 
+create view vw_trip as
+with reservation_counter as (select trip_id, count(*) counter
+                             from reservation r_in
+                             where status <> 'C'
+                             group by trip_id)
+
+select t.trip_id,
+       country,
+       trip_date,
+       trip_name,
+       max_no_places,
+       max_no_Places-counter no_available_places
+from trip t
+        left join reservation_counter rc on rc.trip_id = t.trip_id
+
+
+
+create view vw_available_trip as
+select * from vw_trip
+where no_available_places > 0 and trip_date > sysdate
 ```
 
 
