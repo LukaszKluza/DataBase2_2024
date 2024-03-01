@@ -311,14 +311,14 @@ Proponowany zestaw widoków można rozbudować wedle uznania/potrzeb
 
 ```sql
 
-create view vw_reservation as
+create or replace view vw_reservation as
 select reservation_id, country, trip_date, trip_name, firstname, lastname, status, r.trip_id, r.person_id  from reservation r
 join trip t on t.TRIP_ID = r.TRIP_ID
 join person p on p.PERSON_ID = r.PERSON_ID
 
 
 
-create view vw_trip as
+create or replace view vw_trip as
 with reservation_counter as (select trip_id, count(*) counter
                              from reservation r_in
                              where status <> 'C'
@@ -335,7 +335,7 @@ from trip t
 
 
 
-create view vw_available_trip as
+create or replace view vw_available_trip as
 select * from vw_trip
 where no_available_places > 0 and trip_date > sysdate
 ```
@@ -372,9 +372,92 @@ Proponowany zestaw funkcji można rozbudować wedle uznania/potrzeb
 
 # Zadanie 2  - rozwiązanie
 
-```sql
+- 2.1 _f_trip_participants_
 
--- wyniki, kod, zrzuty ekranów, komentarz ...
+```sql
+create or replace type trip_participants as OBJECT
+(
+    trip_id        int,
+    reservation_id int,
+    country        varchar(50),
+    trip_date      date,
+    trip_name      varchar(100),
+    firstname      varchar(50),
+    lastname       varchar(50),
+    status         char(1),
+    person_id      int
+);
+
+create or replace type trip_participants_table is table of trip_participants;
+
+create or replace function f_trip_participants(trip_id int)
+    return trip_participants_table
+as
+    result trip_participants_table;
+    counter int;
+begin
+    select count(*)
+    into counter
+    from trip t
+    where t.trip_id = f_trip_participants.trip_id;
+
+    if counter = 0 then
+        raise_application_error(-20001, 'Trip ' || f_trip_participants.trip_id || ' does not exist');
+    end if;
+
+    select trip_participants(vwr.trip_id, vwr.reservation_id, vwr.country,
+                             vwr.trip_date, vwr.trip_name, vwr.firstname, vwr.lastname,
+                             vwr.status, vwr.person_id) bulk collect
+    into result
+    from vw_reservation vwr
+    where vwr.trip_id = f_trip_participants.trip_id
+      and vwr.status = 'P';
+
+    return result;
+end;
+```
+
+- 2.2 _f_person_reservations_
+
+```sql
+create or replace type person_reservation as OBJECT
+(
+    trip_id        int,
+    reservation_id int,
+    country        varchar(50),
+    trip_date      date,
+    trip_name      varchar(100),
+    firstname      varchar(50),
+    lastname       varchar(50),
+    status         char(1),
+    person_id      int
+);
+
+create or replace type person_reservations_table is table of person_reservation;
+
+create or replace function f_person_reservations(person_id int)
+    return person_reservations_table
+as
+    result person_reservations_table;
+    counter int;
+begin
+    select count(*)
+    into counter
+    from person p
+    where p.person_id = f_person_reservations.person_id;
+
+    if counter = 0 then
+        raise_application_error(-20001, 'Person ' || f_person_reservations.person_id || ' does not exist');
+    end if;
+
+    select person_reservation(vwr.trip_id, vwr.reservation_id, vwr.country,
+                             vwr.trip_date, vwr.trip_name, vwr.firstname, vwr.lastname,
+                             vwr.status, vwr.person_id) bulk collect
+    into result
+    from vw_reservation vwr
+    where vwr.person_id = f_person_reservations.person_id;
+    return result;
+end;
 
 ```
 
