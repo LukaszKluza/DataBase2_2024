@@ -9,6 +9,8 @@ widoki, funkcje, procedury, triggery
 
 
 Imiona i nazwiska autorów :
+Kluza Łukasz
+Mateusz Sacha
 
 ---
 <style>
@@ -460,6 +462,46 @@ begin
 end;
 
 ```
+
+2.3 f_available_trips_to
+
+```sql
+create or replace type country_trip as OBJECT
+(
+    trip_id        int,
+    country        varchar(50),
+    trip_date      date,
+    trip_name      varchar(100)
+);
+
+CREATE OR REPLACE FUNCTION f_available_trips_to(
+    country_name VARCHAR2,
+    date_from DATE,
+    date_to DATE
+)
+RETURN country_trip_table
+AS
+    result country_trip_table := country_trip_table();
+    counter INT := 0;
+BEGIN
+    SELECT COUNT(*)
+    INTO counter
+    FROM trip t
+    WHERE t.country = country_name
+        AND t.trip_date >= date_from AND t.trip_date <= date_to;
+
+    IF counter = 0 THEN
+        raise_application_error(-20001, 'Trip to ' || country_name || ' does not exist between: ' || date_from ||' and ' || date_to);
+    END IF;
+
+    SELECT country_trip(t.trip_id, t.country, t.trip_date, t.trip_name)
+    BULK COLLECT INTO result
+    FROM trip t
+    WHERE t.country = country_name
+        AND t.trip_date >= date_from AND t.trip_date <= date_to;
+
+    RETURN result;
+END;
 
 
 ---
