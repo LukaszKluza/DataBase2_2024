@@ -643,15 +643,7 @@ BEGIN
     SET max_no_places = p_max_no_places
     WHERE trip_id = p_trip_id;
 
-    COMMIT;
-
     DBMS_OUTPUT.PUT_LINE('Maximum number of places updated successfully.');
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-        RAISE_APPLICATION_ERROR(-20003, 'Trip with specified trip_id does not exist.');
-    WHEN OTHERS THEN
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
 END;
 ```
 
@@ -920,18 +912,8 @@ alter table trip add
 
 # Zadanie 6  - rozwiązanie
 
-```sql
-
--- wyniki, kod, zrzuty ekranów, komentarz ...
-
-```
-
-
-
 ---
 # Zadanie 6a  - procedury
-
-
 
 Obsługę pola `no_available_places` należy zrealizować przy pomocy procedur
 - procedura dodająca rezerwację powinna aktualizować pole `no_available_places` w tabeli trip
@@ -947,13 +929,146 @@ Należy stworzyć nowe wersje tych widoków/procedur/triggerów (np. dodając do
 
 # Zadanie 6a  - rozwiązanie
 
+6a 1.no_available_places 
 ```sql
+create or replace procedure no_available_places is
+begin
+    UPDATE trip t1
+SET no_available_places = (select count(person_id)
+                           from vw_reservation vwr
+                           where vwr.status <> 'C' and t1.trip_id = vwr.trip_id);
+end;
+```
+6a 2.p_add_reservation_6
 
--- wyniki, kod, zrzuty ekranów, komentarz ...
+```sql
+create or replace PROCEDURE p_add_reservation_6a(
+    p_trip_id INT,
+    p_person_id INT
+)
+AS
+    v_trip_date DATE;
+    v_no_places INT;
+    v_reservation_id INT;
+    v_trip_exists INT;
+    v_person_exists INT;
+BEGIN
 
+    SELECT COUNT(*) INTO v_trip_exists
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_trip_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Trip does not exist.');
+    END IF;
+
+    SELECT COUNT(*) INTO v_person_exists
+    FROM person
+    WHERE person_id = p_person_id;
+
+    IF v_person_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Person does not exist.');
+    END IF;
+
+    SELECT trip_date INTO v_trip_date
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_trip_date < SYSDATE THEN
+        RAISE_APPLICATION_ERROR(-20001, 'This trip has already taken place.');
+    END IF;
+
+    SELECT MAX_NO_PLACES - NO_AVAILABLE_PLACES
+    INTO v_no_places
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_no_places <= 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'There are no available seats for this trip.');
+    END IF;
+
+    INSERT INTO reservation(trip_id, person_id, status)
+    VALUES (p_trip_id, p_person_id, 'N')
+    RETURNING reservation_id INTO v_reservation_id;
+
+    no_available_places();
+    DBMS_OUTPUT.PUT_LINE('Reservation added successfully.');
+END;
 ```
 
+6a 3.p_modify_max_no_places_6a
 
+```sql
+create or replace PROCEDURE p_modify_max_no_places_6a(
+    p_trip_id INT,
+    p_max_no_places INT
+)
+AS
+    v_current_reservations INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_current_reservations
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_current_reservations = 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Trip with specified trip_id does not exist.');
+    END IF;
+
+    SELECT t.no_available_places
+    INTO v_current_reservations
+    FROM trip t
+    WHERE trip_id = p_trip_id;
+
+    IF p_max_no_places < v_current_reservations THEN
+        RAISE_APPLICATION_ERROR(-20001, 'New maximum number of places cannot be less than current reservations.');
+    END IF;
+
+    UPDATE trip
+    SET max_no_places = p_max_no_places
+    WHERE trip_id = p_trip_id;
+
+    DBMS_OUTPUT.PUT_LINE('Maximum number of places updated successfully.');
+    NO_AVAILABLE_PLACES();
+END;
+```
+
+6a 4.p_modify_reservation_status_6a
+
+```sql
+create or replace PROCEDURE p_modify_reservation_status_6a(
+    p_reservation_id INT,
+    p_status CHAR
+)
+AS
+    v_status CHAR;
+    v_trip_id INT;
+    v_reservation_exists INT;
+BEGIN
+
+    SELECT COUNT(*) INTO v_reservation_exists
+    FROM reservation
+    WHERE reservation_id = p_reservation_id;
+
+    IF v_reservation_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20005, 'Reservation does not exist.');
+    END IF;
+
+    SELECT status,trip_id INTO v_status,v_trip_id
+    FROM reservation
+    WHERE reservation_id = p_reservation_id;
+
+    IF v_status = 'C' or (p_status = 'N' and v_status = 'P') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'It is no possible to change the status reservation');
+    END IF;
+
+    UPDATE reservation
+    SET status = p_status
+    WHERE reservation_id = p_reservation_id;
+    NO_AVAILABLE_PLACES();
+    DBMS_OUTPUT.PUT_LINE('Reservation status updated successfully.');
+END;
+```
 
 ---
 # Zadanie 6b -  triggery
@@ -973,13 +1088,159 @@ Należy stworzyć nowe wersje tych widoków/procedur/triggerów (np. dodając do
 
 # Zadanie 6b  - rozwiązanie
 
+6b 1. TRG_RESERVATION_INSERT_6b
 
 ```sql
-
--- wyniki, kod, zrzuty ekranów, komentarz ...
-
+create or replace trigger TRG_RESERVATION_INSERT_6b
+    after insert
+    on RESERVATION
+    for each row
+BEGIN
+    INSERT INTO log(reservation_id, log_date, status)
+    VALUES (:NEW.reservation_id, SYSDATE, :NEW.status);
+    NO_AVAILABLE_PLACES();
+END;
 ```
 
+6b 2. TRG_RESERVATION_STATUS_UPDATE_6B
+
+```sql
+create trigger TRG_RESERVATION_STATUS_UPDATE_6B
+    after update of STATUS
+    on RESERVATION
+    for each row
+BEGIN
+    INSERT INTO log(reservation_id, log_date, status)
+    VALUES (:OLD.reservation_id, SYSDATE, :NEW.status);
+    NO_AVAILABLE_PLACES();
+END;
+```
+
+6b 3. p_add_reservation_6b
+
+```sql
+create or replace PROCEDURE p_add_reservation_6b(
+    p_trip_id INT,
+    p_person_id INT
+)
+AS
+    v_trip_date DATE;
+    v_no_places INT;
+    v_reservation_id INT;
+    v_trip_exists INT;
+    v_person_exists INT;
+BEGIN
+
+    SELECT COUNT(*) INTO v_trip_exists
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_trip_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Trip does not exist.');
+    END IF;
+
+    SELECT COUNT(*) INTO v_person_exists
+    FROM person
+    WHERE person_id = p_person_id;
+
+    IF v_person_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Person does not exist.');
+    END IF;
+
+    SELECT trip_date INTO v_trip_date
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_trip_date < SYSDATE THEN
+        RAISE_APPLICATION_ERROR(-20001, 'This trip has already taken place.');
+    END IF;
+
+    SELECT MAX_NO_PLACES - NO_AVAILABLE_PLACES
+    INTO v_no_places
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_no_places <= 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'There are no available seats for this trip.');
+    END IF;
+
+    INSERT INTO reservation(trip_id, person_id, status)
+    VALUES (p_trip_id, p_person_id, 'N')
+    RETURNING reservation_id INTO v_reservation_id;
+
+    DBMS_OUTPUT.PUT_LINE('Reservation added successfully.');
+END;
+```
+
+6b 4. p_modify_max_no_places_6b
+
+```sql
+create or replace PROCEDURE p_modify_max_no_places_6b(
+    p_trip_id INT,
+    p_max_no_places INT
+)
+AS
+    v_current_reservations INT;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_current_reservations
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_current_reservations = 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Trip with specified trip_id does not exist.');
+    END IF;
+
+    SELECT t.no_available_places
+    INTO v_current_reservations
+    FROM trip t
+    WHERE trip_id = p_trip_id;
+
+    IF p_max_no_places < v_current_reservations THEN
+        RAISE_APPLICATION_ERROR(-20001, 'New maximum number of places cannot be less than current reservations.');
+    END IF;
+
+    UPDATE trip
+    SET max_no_places = p_max_no_places
+    WHERE trip_id = p_trip_id;
+
+    DBMS_OUTPUT.PUT_LINE('Maximum number of places updated successfully.');
+END;
+```
+
+```sql
+create or replace PROCEDURE p_modify_reservation_status_6b(
+    p_reservation_id INT,
+    p_status CHAR
+)
+AS
+    v_status CHAR;
+    v_trip_id INT;
+    v_reservation_exists INT;
+BEGIN
+
+    SELECT COUNT(*) INTO v_reservation_exists
+    FROM reservation
+    WHERE reservation_id = p_reservation_id;
+
+    IF v_reservation_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20005, 'Reservation does not exist.');
+    END IF;
+
+    SELECT status,trip_id INTO v_status,v_trip_id
+    FROM reservation
+    WHERE reservation_id = p_reservation_id;
+
+    IF v_status = 'C' or (p_status = 'N' and v_status = 'P') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'It is no possible to change the status reservation');
+    END IF;
+
+    UPDATE reservation
+    SET status = p_status
+    WHERE reservation_id = p_reservation_id;
+    DBMS_OUTPUT.PUT_LINE('Reservation status updated successfully.');
+END;
+```
 
 # Zadanie 7 - podsumowanie
 
