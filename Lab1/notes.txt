@@ -1,0 +1,6 @@
+FUNKCJA -> select * from F_AVAILABLE_TRIPS_TO('Polska', TO_DATE('2010-01-01', 'YYYY-MM-DD'), TO_DATE('2030-01-01', 'YYYY-MM-DD'));
+
+PROCEDURA -> 
+BEGIN
+  p_add_reservation_6b(p_trip_id => 2, p_person_id => 1);
+END;

@@ -474,6 +474,8 @@ create or replace type country_trip as OBJECT
     trip_name      varchar(100)
 );
 
+create type or replace COUNTRY_TRIP_TABLE as table of COUNTRY_TRIP
+
 CREATE OR REPLACE FUNCTION f_available_trips_to(
     country_name VARCHAR2,
     date_from DATE,
@@ -502,7 +504,7 @@ BEGIN
 
     RETURN result;
 END;
-
+```
 
 ---
 # Zadanie 3  - procedury
@@ -1147,7 +1149,7 @@ END;
 6b 2. TRG_RESERVATION_STATUS_UPDATE_6B
 
 ```sql
-create trigger TRG_RESERVATION_STATUS_UPDATE_6B
+create or replace trigger TRG_RESERVATION_STATUS_UPDATE_6B
     after update of STATUS
     on RESERVATION
     for each row
