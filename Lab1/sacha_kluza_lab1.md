@@ -242,7 +242,6 @@ pomocne mogą być materiały dostępne tu:
 https://upel.agh.edu.pl/mod/folder/view.php?id=214774
 w szczególności dokument: `1_modyf.pdf`
 
-## DODAŁEM o jedną rezerwację za dużo :(
 ```sql
 -- person
 insert into person(firstname, lastname)
@@ -404,12 +403,13 @@ begin
     where t.trip_id = f_trip_participants.trip_id;
 
     if counter = 0 then
-        raise_application_error(-20001, 'Trip ' || f_trip_participants.trip_id || ' does not exist');
+        raise_application_error(-20001, 'Trip ' || f_trip_participants.trip_id
+        || ' does not exist');
     end if;
 
     select trip_participants(vwr.trip_id, vwr.reservation_id, vwr.country,
-                             vwr.trip_date, vwr.trip_name, vwr.firstname, vwr.lastname,
-                             vwr.status, vwr.person_id) bulk collect
+        vwr.trip_date, vwr.trip_name, vwr.firstname, vwr.lastname,
+        vwr.status, vwr.person_id) bulk collect
     into result
     from vw_reservation vwr
     where vwr.trip_id = f_trip_participants.trip_id
@@ -449,12 +449,13 @@ begin
     where p.person_id = f_person_reservations.person_id;
 
     if counter = 0 then
-        raise_application_error(-20001, 'Person ' || f_person_reservations.person_id || ' does not exist');
+        raise_application_error(-20001, 'Person ' 
+        || f_person_reservations.person_id || ' does not exist');
     end if;
 
     select person_reservation(vwr.trip_id, vwr.reservation_id, vwr.country,
-                             vwr.trip_date, vwr.trip_name, vwr.firstname, vwr.lastname,
-                             vwr.status, vwr.person_id) bulk collect
+        vwr.trip_date, vwr.trip_name, vwr.firstname, vwr.lastname, 
+        vwr.status, vwr.person_id) bulk collect
     into result
     from vw_reservation vwr
     where vwr.person_id = f_person_reservations.person_id;
@@ -493,7 +494,8 @@ BEGIN
         AND t.trip_date >= date_from AND t.trip_date <= date_to;
 
     IF counter = 0 THEN
-        raise_application_error(-20001, 'Trip to ' || country_name || ' does not exist between: ' || date_from ||' and ' || date_to);
+        raise_application_error(-20001, 'Trip to ' || country_name 
+        || ' does not exist between: ' || date_from ||' and ' || date_to);
     END IF;
 
     SELECT country_trip(t.trip_id, t.country, t.trip_date, t.trip_name)
@@ -506,7 +508,7 @@ BEGIN
 END;
 ```
 
----
+
 # Zadanie 3  - procedury
 
 
@@ -579,7 +581,8 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20001, 'This trip has already taken place.');
     END IF;
 
-    SELECT max_no_places - NVL((SELECT COUNT(*) FROM reservation WHERE trip_id = p_trip_id), 0)
+    SELECT max_no_places - NVL((SELECT COUNT(*) FROM reservation 
+                                WHERE trip_id = p_trip_id), 0)
     INTO v_no_places
     FROM trip
     WHERE trip_id = p_trip_id;
@@ -594,15 +597,6 @@ BEGIN
     
     INSERT INTO log(reservation_id,log_date,status)
     VALUES (v_reservation_id, SYSDATE, 'N');
-
-    COMMIT;
-
-    DBMS_OUTPUT.PUT_LINE('Reservation added successfully.');
-EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
-END;
 ```
 
 - 3.2 _p_modify_reservation_status_
@@ -630,13 +624,15 @@ BEGIN
     FROM reservation
     WHERE reservation_id = p_reservation_id;
 
-    SELECT max_no_places - NVL((SELECT COUNT(*) FROM reservation WHERE trip_id = v_trip_id), 0)
+    SELECT max_no_places - NVL((SELECT COUNT(*) FROM reservation 
+                                WHERE trip_id = v_trip_id), 0)
     INTO v_no_places
     FROM trip
     WHERE trip_id = v_trip_id;
 
-    IF v_status <> 'C' and p_status <> 'P' and v_no_places <= 0 THEN
-        RAISE_APPLICATION_ERROR(-20001, 'There are no available seats for this trip.');
+    IF v_status = 'C' or (p_status = 'N' and v_status = 'P') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'It is no possible 
+        to change the status reservation');
     END IF;
 
     UPDATE reservation
@@ -645,14 +641,6 @@ BEGIN
 
     INSERT INTO log(reservation_id,log_date,status)
     VALUES (p_reservation_id, SYSDATE, p_status);
-
-    COMMIT;
-
-    DBMS_OUTPUT.PUT_LINE('Reservation status updated successfully.');
-EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
 END;
 ```
 
@@ -671,7 +659,8 @@ BEGIN
     WHERE trip_id = p_trip_id;
 
     IF v_current_reservations = 0 THEN
-        RAISE_APPLICATION_ERROR(-20002, 'Trip with specified trip_id does not exist.');
+        RAISE_APPLICATION_ERROR(-20002, 'Trip with specified trip_id 
+                                does not exist.');
     END IF;
 
     SELECT COUNT(*)
@@ -680,14 +669,14 @@ BEGIN
     WHERE trip_id = p_trip_id;
 
     IF p_max_no_places < v_current_reservations THEN
-        RAISE_APPLICATION_ERROR(-20001, 'New maximum number of places cannot be less than current reservations.');
+        RAISE_APPLICATION_ERROR(-20001, 'New maximum number
+        of places cannot be less than current reservations.');
     END IF;
 
     UPDATE trip
     SET max_no_places = p_max_no_places
     WHERE trip_id = p_trip_id;
 
-    DBMS_OUTPUT.PUT_LINE('Maximum number of places updated successfully.');
 END;
 ```
 
@@ -785,7 +774,8 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20001, 'This trip has already taken place.');
     END IF;
 
-    SELECT max_no_places - NVL((SELECT COUNT(*) FROM reservation WHERE trip_id = p_trip_id), 0)
+    SELECT max_no_places - NVL((SELECT COUNT(*) FROM reservation 
+                                WHERE trip_id = p_trip_id), 0)
     INTO v_no_places
     FROM trip
     WHERE trip_id = p_trip_id;
@@ -798,13 +788,6 @@ BEGIN
     VALUES (p_trip_id, p_person_id, 'N')
     RETURNING reservation_id INTO v_reservation_id;
 
-    COMMIT;
-
-    DBMS_OUTPUT.PUT_LINE('Reservation added successfully.');
-EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
 END;
 ```
 
@@ -833,26 +816,20 @@ BEGIN
     FROM reservation
     WHERE reservation_id = p_reservation_id;
 
-    SELECT max_no_places - NVL((SELECT COUNT(*) FROM reservation WHERE trip_id = v_trip_id), 0)
+    SELECT max_no_places - NVL((SELECT COUNT(*) FROM reservation 
+                                WHERE trip_id = v_trip_id), 0)
     INTO v_no_places
     FROM trip
     WHERE trip_id = v_trip_id;
 
-    IF v_status <> 'C' and p_status <> 'P' and v_no_places <= 0 THEN
-        RAISE_APPLICATION_ERROR(-20001, 'There are no available seats for this trip.');
+    IF v_status = 'C' or (p_status = 'N' and v_status = 'P') THEN
+        RAISE_APPLICATION_ERROR(-20001, 'It is no possible to change the status reservation');
     END IF;
 
     UPDATE reservation
     SET status = p_status
     WHERE reservation_id = p_reservation_id;
 
-    COMMIT;
-
-    DBMS_OUTPUT.PUT_LINE('Reservation status updated successfully.');
-EXCEPTION
-    WHEN OTHERS THEN
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
 END;
 ```
 
@@ -922,9 +899,87 @@ BEGIN
     FROM reservation
     WHERE trip_id = :NEW.trip_id;
 
-    IF v_reserved_places >= v_max_no_places and :OLD.status <> 'C' and :NEW.status <> 'P' THEN
+    IF v_reserved_places >= v_max_no_places and :OLD.status = 'C' 
+        and :NEW.status = 'P' THEN
         RAISE_APPLICATION_ERROR(-20001, 'There are no available seats for this trip.');
     END IF;
+END;
+```
+
+- 5.3 _p_add_reservation_5_
+```sql
+CREATE OR REPLACE PROCEDURE p_add_reservation_5(
+    p_trip_id INT,
+    p_person_id INT
+)
+AS
+    v_trip_date DATE;
+    v_no_places INT;
+    v_reservation_id INT;
+    v_trip_exists INT;
+    v_person_exists INT;
+BEGIN
+
+    SELECT COUNT(*) INTO v_trip_exists
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_trip_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Trip does not exist.');
+    END IF;
+
+    SELECT COUNT(*) INTO v_person_exists
+    FROM person
+    WHERE person_id = p_person_id;
+
+    IF v_person_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Person does not exist.');
+    END IF;
+
+    SELECT trip_date INTO v_trip_date
+    FROM trip
+    WHERE trip_id = p_trip_id;
+
+    IF v_trip_date < SYSDATE THEN
+        RAISE_APPLICATION_ERROR(-20001, 'This trip has already taken place.');
+    END IF;
+
+    INSERT INTO reservation(trip_id, person_id, status)
+    VALUES (p_trip_id, p_person_id, 'N')
+    RETURNING reservation_id INTO v_reservation_id;
+
+END;
+```
+
+- 5.4 _p_modify_reservation_status_5_
+```sql
+CREATE OR REPLACE PROCEDURE p_modify_reservation_status_5(
+    p_reservation_id INT,
+    p_status CHAR
+)
+AS
+    v_status CHAR;
+    v_no_places INT;
+    v_trip_id INT;
+    v_reservation_exists INT;
+BEGIN
+
+    SELECT COUNT(*) INTO v_reservation_exists
+    FROM reservation
+    WHERE reservation_id = p_reservation_id;
+
+    IF v_reservation_exists = 0 THEN
+        RAISE_APPLICATION_ERROR(-20005, 'Reservation does not exist.');
+    END IF;
+
+    SELECT status,trip_id INTO v_status,v_trip_id
+    FROM reservation
+    WHERE reservation_id = p_reservation_id;
+
+    UPDATE reservation
+    SET status = p_status
+    WHERE reservation_id = p_reservation_id;
+
 END;
 ```
 
@@ -973,7 +1028,7 @@ Należy stworzyć nowe wersje tych widoków/procedur/triggerów (np. dodając do
 
 # Zadanie 6a  - rozwiązanie
 
-6a 1.no_available_places 
+- 6a 1.no_available_places 
 ```sql
 create or replace procedure no_available_places is
 begin
@@ -983,7 +1038,7 @@ SET no_available_places = (select count(person_id)
                            where vwr.status <> 'C' and t1.trip_id = vwr.trip_id);
 end;
 ```
-6a 2.p_add_reservation_6
+- 6a 2.p_add_reservation_6
 
 ```sql
 create or replace PROCEDURE p_add_reservation_6a(
@@ -1040,7 +1095,7 @@ BEGIN
 END;
 ```
 
-6a 3.p_modify_max_no_places_6a
+- 6a 3.p_modify_max_no_places_6a
 
 ```sql
 create or replace PROCEDURE p_modify_max_no_places_6a(
@@ -1065,7 +1120,8 @@ BEGIN
     WHERE trip_id = p_trip_id;
 
     IF p_max_no_places < v_current_reservations THEN
-        RAISE_APPLICATION_ERROR(-20001, 'New maximum number of places cannot be less than current reservations.');
+        RAISE_APPLICATION_ERROR(-20001, 'New maximum number of places cannot be 
+        less than current reservations.');
     END IF;
 
     UPDATE trip
@@ -1077,7 +1133,7 @@ BEGIN
 END;
 ```
 
-6a 4.p_modify_reservation_status_6a
+- 6a 4.p_modify_reservation_status_6a
 
 ```sql
 create or replace PROCEDURE p_modify_reservation_status_6a(
@@ -1132,10 +1188,10 @@ Należy stworzyć nowe wersje tych widoków/procedur/triggerów (np. dodając do
 
 # Zadanie 6b  - rozwiązanie
 
-6b 1. TRG_RESERVATION_INSERT_6b
+- 6b 1. trg_reservation_insert_6B
 
 ```sql
-create or replace trigger TRG_RESERVATION_INSERT_6b
+create or replace trigger TRG_RESERVATION_INSERT_6B
     after insert
     on RESERVATION
     for each row
@@ -1146,7 +1202,7 @@ BEGIN
 END;
 ```
 
-6b 2. TRG_RESERVATION_STATUS_UPDATE_6B
+- 6b 2. trg_reservation_status_update_6B
 
 ```sql
 create or replace trigger TRG_RESERVATION_STATUS_UPDATE_6B
@@ -1160,7 +1216,7 @@ BEGIN
 END;
 ```
 
-6b 3. p_add_reservation_6b
+- 6b 3. p_add_reservation_6b
 
 ```sql
 create or replace PROCEDURE p_add_reservation_6b(
@@ -1216,7 +1272,7 @@ BEGIN
 END;
 ```
 
-6b 4. p_modify_max_no_places_6b
+- 6b 4. p_modify_max_no_places_6b
 
 ```sql
 create or replace PROCEDURE p_modify_max_no_places_6b(
@@ -1241,7 +1297,8 @@ BEGIN
     WHERE trip_id = p_trip_id;
 
     IF p_max_no_places < v_current_reservations THEN
-        RAISE_APPLICATION_ERROR(-20001, 'New maximum number of places cannot be less than current reservations.');
+        RAISE_APPLICATION_ERROR(-20001, 'New maximum number of places cannot be 
+        less than current reservations.');
     END IF;
 
     UPDATE trip
@@ -1251,6 +1308,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Maximum number of places updated successfully.');
 END;
 ```
+- 6b 4. p_modify_reservation_status_6b
 
 ```sql
 create or replace PROCEDURE p_modify_reservation_status_6b(
@@ -1290,8 +1348,29 @@ END;
 
 Porównaj sposób programowania w systemie Oracle PL/SQL ze znanym ci systemem/językiem MS Sqlserver T-SQL
 
-```sql
+```txt
 
--- komentarz ...
+Programowanie w Oracle PL/SQL i Microsoft SQL Server T-SQL różni się głównie składnią i funkcjonalnościami:
+
+1. PL/SQL: Opiera się na języku programowania proceduralnego, z blokami kodu BEGIN...END.
+T-SQL: Ma bardziej zwięzłą składnię, zbliżoną do standardowego języka zapytań SQL.
+
+2. PL/SQL: Deklaracje zmiennych na początku bloku, różnorodne typy danych.
+T-SQL: Mniejszy wybór typów danych, proste deklaracje zmiennych.
+
+3. PL/SQL: Rozbudowany mechanizm obsługi wyjątków.
+T-SQL: Obsługuje wyjątki za pomocą instrukcji TRY...CATCH.
+
+4. PL/SQL: Obsługuje transakcje za pomocą COMMIT i ROLLBACK.
+T-SQL: Również wspiera transakcje, ale z inną składnią.
+
+5. PL/SQL: Posiada funkcje do manipulacji danymi daty i czasu, takie jak SYSDATE, TO_DATE.
+T-SQL: Również oferuje funkcje do pracy z danymi daty i czasu, jednak o innych nazwach 
+takie jak GETDATE(), CONVERT.
+
+6. PL/SQL: Przy tworzeniu procedur, konieczne jest zdefiniowanie obiektów 
+typu tabela przed ich użyciem w procedurze.
+T-SQL: Nie ma potrzeby definiowania obiektów typu tabela przed użyciem ich w procedurze.
 
 ```
+
