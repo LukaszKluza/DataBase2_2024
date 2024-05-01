@@ -201,13 +201,143 @@ Do sprawozdania należy kompletny zrzut wykonanych/przygotowanych baz danych (ta
 ## Zadanie 2  - rozwiązanie
 
 > Wyniki: 
-> 
-> przykłady, kod, zrzuty ekranów, komentarz ...
 
-```js
---  ...
+### a)
+#### Wariant 1 (embedding):
+```JSON
+Embedded documents:
+{
+  "_id": ObjectId,
+  "company": {
+    "name": String,
+    "location": String
+  },
+  "tour": {
+    "name": String,
+    "date": Date,
+    "duration": Number
+  },
+  "person": {
+    "name": String,
+    "email": String
+  },
+  "reservation": {
+    "seats": Number,
+    "price": Number
+  },
+  "rating": Number
+}
 ```
 
+#### Wariant 2 (references):
+```JSON
+Companies collection:
+{
+  "_id": ObjectId,
+  "name": String,
+  "location": String
+}
+```
+```JSON
+Trips collection:
+{
+  "_id": ObjectId,
+  "companyId": ObjectId,
+  "name": String,
+  "date": Date,
+  "duration": Number
+}
+```
+```JSON
+Persons collection:
+{
+  "_id": ObjectId,
+  "name": String,
+  "email": String
+}
+```
+```JSON
+Reservations collection:
+{
+  "_id": ObjectId,
+  "tourId": ObjectId,
+  "personId": ObjectId,
+  "seats": Number,
+  "price": Number,
+  "rating": Number
+}
+```
+
+### b)
+#### Wariant 1 (przykładowe dane):
+
+```JSON
+{
+  "_id":{"$oid":"66322ba7fc33997b00b115ac"},
+  "company":{
+    "name":"Adventure Tours Inc.",
+    "location":"New York"
+    },
+  "tour":{
+    "name":"City Bike Tour",
+    "date":{"$date":"2024-05-10T09:00:00Z"},
+    "duration":3
+    },
+  "person":{
+    "name":"John Doe",
+    "email":"john@example.com"
+    },
+  "reservation":{
+    "seats":2,
+    "price":100
+    },
+  "rating":4
+}
+```
+![alt text](image.png)
+
+#### Wariant 2 (przykładowe dane):
+```JSON
+Companies collection:
+{
+  "_id": ObjectId("60994c3d65c84c4bf432fc1a"),
+  "name": "Adventure Tours Inc.",
+  "location": "New York"
+}
+```
+![alt text](image-1.png)
+```JSON
+Tours collection:
+{
+  "_id": ObjectId("60994c4f65c84c4bf432fc1b"),
+  "companyId": ObjectId("60994c3d65c84c4bf432fc1a"),
+  "name": "City Bike Tour",
+  "date": ISODate("2024-05-10T09:00:00Z"),
+  "duration": 3
+}
+```
+![alt text](image-2.png)
+```JSON
+Persons collection:
+{
+  "_id": ObjectId("60994c7e65c84c4bf432fc1c"),
+  "name": "John Doe",
+  "email": "john@example.com"
+}
+```
+![alt text](image-3.png)
+```JSON
+Reservations collection:
+{
+  "_id": ObjectId("60994c4f65c84c4bf432fc1b"),
+  "tourId": ObjectId("60994c4f65c84c4bf432fc1b"),
+  "personId": ObjectId("60994c7e65c84c4bf432fc1c"),
+  "seats": 2,
+  "price": 100,
+  "rating": 4
+}
+```
+![alt text](image-4.png)
 ---
 
 Punktacja:
