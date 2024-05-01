@@ -204,6 +204,8 @@ Do sprawozdania należy kompletny zrzut wykonanych/przygotowanych baz danych (ta
 
 ### a)
 #### Wariant 1 (embedding):
+##### Struktura danych:
+Jedna kolekcja zawierająca wszystkie dane o firmach, wycieczkach, osobach i rezerwacjach osadzonych w jednym dokumencie.
 ```JSON
 Embedded documents:
 {
@@ -228,8 +230,18 @@ Embedded documents:
   "rating": Number
 }
 ```
+##### Zalety:
+* Prostota struktury danych - wszystkie powiązane dane są przechowywane w jednym dokumencie, co ułatwia ich pobieranie i aktualizację.
+* Szybki dostęp do danych - nie ma potrzeby wykonywania złączeń między kolekcjami, co może poprawić wydajność zapytań.
+##### Wady:
+* Duplikacja danych - dane mogą być powielane w wielu dokumentach, co może prowadzić do redundancji i zwiększać rozmiar bazy danych.
+* Aktualizacja danych - jeśli dane są powielane w wielu miejscach, aktualizacja ich wymaga modyfikacji wielu dokumentów, co może być czasochłonne i skomplikowane.
+
+---
 
 #### Wariant 2 (references):
+##### Struktura danych:
+Oddzielne kolekcje dla firm, wycieczek, osób i rezerwacji, z referencjami między nimi.
 ```JSON
 Companies collection:
 {
@@ -267,6 +279,12 @@ Reservations collection:
   "rating": Number
 }
 ```
+##### Zalety:
+* Brak duplikacji danych - każda encja jest przechowywana w osobnym dokumencie, co eliminuje redundancję danych.
+* Łatwa aktualizacja - jeśli dane są przechowywane w jednym dokumencie, aktualizacja wymaga zmiany tylko jednego miejsca.
+##### Wady:
+* Potrzeba wykonywania złączeń - w celu pobrania powiązanych danych konieczne jest wykonanie złączeń między kolekcjami, co może wpłynąć na wydajność zapytań.
+* Większa złożoność struktury danych - konieczność zarządzania referencjami między kolekcjami może sprawić, że struktura danych będzie bardziej skomplikowana.
 
 ### b)
 #### Wariant 1 (przykładowe dane):
