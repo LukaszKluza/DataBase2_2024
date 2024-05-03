@@ -1,0 +1,20 @@
+{"_id":{"$oid":"60994c4f65c84c4bf432fc1b"},"companyId":{"$oid":"60994c3d65c84c4bf432fc1a"},"name":"City Bike Tour","date":{"$date":"2024-05-10T09:00:00Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d315ec"},"companyId":{"$oid":"663236e62b9d0a4a55d315eb"},"name":"Tour 2","date":{"$date":"2024-05-08T12:34:46.812Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d315f0"},"companyId":{"$oid":"663236e62b9d0a4a55d315ef"},"name":"Tour 3","date":{"$date":"2024-05-08T12:34:46.836Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d315f4"},"companyId":{"$oid":"663236e62b9d0a4a55d315f3"},"name":"Tour 4","date":{"$date":"2024-05-08T12:34:46.857Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d315f8"},"companyId":{"$oid":"663236e62b9d0a4a55d315f7"},"name":"Tour 5","date":{"$date":"2024-05-08T12:34:46.875Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d315fc"},"companyId":{"$oid":"663236e62b9d0a4a55d315fb"},"name":"Tour 6","date":{"$date":"2024-05-08T12:34:46.895Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d31600"},"companyId":{"$oid":"663236e62b9d0a4a55d315ff"},"name":"Tour 7","date":{"$date":"2024-05-08T12:34:46.914Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d31604"},"companyId":{"$oid":"663236e62b9d0a4a55d31603"},"name":"Tour 8","date":{"$date":"2024-05-08T12:34:46.931Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d31608"},"companyId":{"$oid":"663236e62b9d0a4a55d31607"},"name":"Tour 9","date":{"$date":"2024-05-08T12:34:46.948Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d3160c"},"companyId":{"$oid":"663236e62b9d0a4a55d3160b"},"name":"Tour 10","date":{"$date":"2024-05-08T12:34:46.965Z"},"duration":3}
+{"_id":{"$oid":"663236e62b9d0a4a55d31610"},"companyId":{"$oid":"663236e62b9d0a4a55d3160f"},"name":"Tour 11","date":{"$date":"2024-05-08T12:34:46.983Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d31614"},"companyId":{"$oid":"663236e72b9d0a4a55d31613"},"name":"Tour 12","date":{"$date":"2024-05-08T12:34:47.003Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d31618"},"companyId":{"$oid":"663236e72b9d0a4a55d31617"},"name":"Tour 13","date":{"$date":"2024-05-08T12:34:47.022Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d3161c"},"companyId":{"$oid":"663236e72b9d0a4a55d3161b"},"name":"Tour 14","date":{"$date":"2024-05-08T12:34:47.039Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d31620"},"companyId":{"$oid":"663236e72b9d0a4a55d3161f"},"name":"Tour 15","date":{"$date":"2024-05-08T12:34:47.056Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d31624"},"companyId":{"$oid":"663236e72b9d0a4a55d31623"},"name":"Tour 16","date":{"$date":"2024-05-08T12:34:47.073Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d31628"},"companyId":{"$oid":"663236e72b9d0a4a55d31627"},"name":"Tour 17","date":{"$date":"2024-05-08T12:34:47.094Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d3162c"},"companyId":{"$oid":"663236e72b9d0a4a55d3162b"},"name":"Tour 18","date":{"$date":"2024-05-08T12:34:47.109Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d31630"},"companyId":{"$oid":"663236e72b9d0a4a55d3162f"},"name":"Tour 19","date":{"$date":"2024-05-08T12:34:47.126Z"},"duration":3}
+{"_id":{"$oid":"663236e72b9d0a4a55d31634"},"companyId":{"$oid":"663236e72b9d0a4a55d31633"},"name":"Tour 20","date":{"$date":"2024-05-08T12:34:47.145Z"},"duration":3}
