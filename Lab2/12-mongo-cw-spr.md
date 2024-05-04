@@ -206,7 +206,7 @@ Do sprawozdania należy kompletny zrzut wykonanych/przygotowanych baz danych (ta
 #### Wariant 1 (embedding):
 ##### Struktura danych:
 Jedna kolekcja zawierająca wszystkie dane o firmach, wycieczkach, osobach i rezerwacjach osadzonych w jednym dokumencie.
-```JSON
+```js
 Embedded documents:
 {
   "_id": ObjectId,
@@ -242,7 +242,7 @@ Embedded documents:
 #### Wariant 2 (references):
 ##### Struktura danych:
 Oddzielne kolekcje dla firm, wycieczek, osób i rezerwacji, z referencjami między nimi.
-```JSON
+```js
 Companies collection:
 {
   "_id": ObjectId,
@@ -250,7 +250,7 @@ Companies collection:
   "location": String
 }
 ```
-```JSON
+```js
 Trips collection:
 {
   "_id": ObjectId,
@@ -260,7 +260,7 @@ Trips collection:
   "duration": Number
 }
 ```
-```JSON
+```js
 Persons collection:
 {
   "_id": ObjectId,
@@ -268,7 +268,7 @@ Persons collection:
   "email": String
 }
 ```
-```JSON
+```js
 Reservations collection:
 {
   "_id": ObjectId,
@@ -289,7 +289,7 @@ Reservations collection:
 ### b)
 #### Wariant 1 (przykładowe dane):
 
-```JSON
+```js
 {
   "_id":{"$oid":"66322ba7fc33997b00b115ac"},
   "company":{
@@ -315,7 +315,7 @@ Reservations collection:
 ![alt text](image.png)
 
 #### Wariant 2 (przykładowe dane):
-```JSON
+```js
 Companies collection:
 {
   "_id": ObjectId("60994c3d65c84c4bf432fc1a"),
@@ -324,7 +324,7 @@ Companies collection:
 }
 ```
 ![alt text](image-1.png)
-```JSON
+```js
 Tours collection:
 {
   "_id": ObjectId("60994c4f65c84c4bf432fc1b"),
@@ -335,7 +335,7 @@ Tours collection:
 }
 ```
 ![alt text](image-2.png)
-```JSON
+```js
 Persons collection:
 {
   "_id": ObjectId("60994c7e65c84c4bf432fc1c"),
@@ -344,7 +344,7 @@ Persons collection:
 }
 ```
 ![alt text](image-3.png)
-```JSON
+```js
 Reservations collection:
 {
   "_id": ObjectId("60994c4f65c84c4bf432fc1b"),
@@ -356,6 +356,89 @@ Reservations collection:
 }
 ```
 ![alt text](image-4.png)
+
+- c.1 
+  Rozważmy zapytanie, które mam nam zwrócić wszystkie rezerwacje danej osoby ntóre spełniją danę warunki: 
+  - muszą byc zrealizowane przez daną firmę
+  - ich cena powinna być większa od zadanej
+  - czas ich trwania musi być równy zadanemu
+
+Zrealizujemy teraz to zapytanie na dwóch bazach zaprojektowanych w różny spsób.
+W pierwszym przypadku szukamy wszyskich rezerwacji osoby o imieniu: _William Davis_, zrealizowanych w firmie: _City Explorations Inc. z ceną powyżej_ _130_ i _trwających _4_ dni. 
+
+Takie zapytanie możemy zrealizować tym poleceniem
+
+```js
+db.tours.find(
+{
+    "company.name": "City Explorations Inc.",
+    "person.name": "William Davis",
+    "reservation.price": {$gt: 130},
+    "tour.duration": {$eq: 4},
+},
+{
+    "_id":0,
+    "person.name": 1,
+    "tour.name": 1,
+    "tour.duration": 1,
+    "company.name": 1,
+    "reservation.seats" :1,
+    "reservation.price" :1,
+}
+)
+```
+Jako rezultat dostaniemy: 
+![alt text](image-5.png)
+
+W drugim przypadku ym razem szukamy wszyskich rezerwacji osoby o imieniu: _Sophia Taylor_, zrealizowanych w firmie: _Adventures Unlimited LLC_ z ceną powyżej _75_ i _trwających _5_ dni. 
+
+Teraz polecenie realozujące to zapytanie wygląda następująco: 
+
+```js
+db.persons.aggregate([
+    {
+        $lookup: {
+            from: "reservations",
+            localField: "_id",
+            foreignField: "personId",
+            as: "reservation"
+        }
+    },
+    {$unwind: "$reservation"},
+    {
+        $lookup: {
+            from: "tours",
+            localField: "reservation.tourId",
+            foreignField: "_id",
+            as: "tour"
+        }
+    },
+    {$unwind: "$tour"},
+    {
+        $lookup: {
+            from: "companies",
+            localField: "tour.companyId",
+            foreignField: "_id",
+            as: "company"
+        }
+    },
+    { $unwind: "$company" },
+    { $match: { "name": "Sophia Taylor" } },
+    { $match: { "company.name": "Adventures Unlimited LLC" } },
+    { $match: { "reservation.price": { $gt: 75 } } },
+    { $match: { "tour.duration": 5 } },
+    {
+        $project: { "_id": 0, "name": 1, "tour.name": 1, "tour.duration": 1, "company.name": 1, "reservation.seats" :1, "reservation.price" :1}
+    }
+])
+```
+![alt text](image-6.png)
+
+##### Wnioski
+Mimo, że oba polecenie relizują dokładnie to samo zapytanie tylko z innymi parametrami ich kod jest zupełnie inny. W bazie danych typu _embedding_ jest on dużo krótszy
+oraz łatwiejszy do napisania i zrozumienia. Dodakowo sam czas wykonywania polecenia też jest szybszy ponieważ wykonujemy znacząco mniej operacji.
+Natomiast w bazie danych typu _references_ pomimo, że nie mamy redundancji danych to samo zapytanie jest dużo bardziej skomplikowane i bardziej czasochłonne ponieważ musimy używac polecenia _$lookup_ aby połączyć dwie kolekcje w jedną.
+W związku z tym baza typu _embedding_ lepiej sprawdzi się niż _references_ w sytuacji gdzie w przeciwnym wypadku musimy sięgać do wielu kolekcji jednocześnie.
 ---
 
 Punktacja:
