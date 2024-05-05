@@ -439,6 +439,107 @@ Mimo, że oba polecenie relizują dokładnie to samo zapytanie tylko z innymi pa
 oraz łatwiejszy do napisania i zrozumienia. Dodakowo sam czas wykonywania polecenia też jest szybszy ponieważ wykonujemy znacząco mniej operacji.
 Natomiast w bazie danych typu _references_ pomimo, że nie mamy redundancji danych to samo zapytanie jest dużo bardziej skomplikowane i bardziej czasochłonne ponieważ musimy używac polecenia _$lookup_ aby połączyć dwie kolekcje w jedną.
 W związku z tym baza typu _embedding_ lepiej sprawdzi się niż _references_ w sytuacji gdzie w przeciwnym wypadku musimy sięgać do wielu kolekcji jednocześnie.
+
+- c.2
+  Tym razem porównyjemy zapytania które zwracają nam unikalne imiona klientów.
+
+_embedding_
+
+```js
+db.tours.aggregate([
+  {
+    $group: {
+      _id: "$person.name",
+    }
+  }
+])
+```
+![alt text](image-7.png)
+
+_references_
+```js
+db.persons.distinct("name")
+```
+![alt text](image-8.png)
+
+##### Wnioski
+Do tego rodzaju zapytań lepiej sprawdzą się bazy typu _references_ ponieważ w nich z definicji dla każdego rodzaju danych mamy osobne kolekcje.
+W bazie _embedding_ to zapytanie też nie jest skomplikowane ale operacja _grupowania_ może być bardziej czascohłonna niż _distinct_
+
+- c.3
+Dodawanie nowych danych: fimry, wycieczki, klienta, rezweracji:
+
+_embedding_
+
+```js
+db.tours.insertOne(
+  {
+    "company": {
+      "name": "Adventure Seekers Ltd.",
+      "location": "Denver"
+    },
+    "tour": {
+      "name": "Mountain Hiking Expedition",
+      "date": new Date("2025-07-15T08:00:00Z"),
+      "duration": 5
+    },
+    "person": {
+      "name": "David Johnson",
+      "email": "david@example.com"
+    },
+    "reservation": {
+      "seats": 2,
+      "price": 120,
+    },
+    "rating": 4
+  },
+);
+```
+![alt text](image-9.png)
+
+
+_references_
+```js
+db.companies.insertOne({
+    "name": "Adventure Seekers Ltd.",
+    "location": "Denver"
+})
+```
+![alt text](image-10.png)
+
+```js
+db.persons.insertOne({
+    "name": "David Johnson",
+    "email": "david@example.com"
+})
+```
+![alt text](image-11.png)
+
+
+```js
+db.tours.insertOne({
+    "companyId" : ObjectId("66375ff0bbce22392efc686c"),
+    "name": "Mountain Hiking Expedition",
+    "date": new Date("2025-07-15T08:00:00Z"),
+    "duration": 5
+})
+```
+![alt text](image-12.png)
+
+```js
+db.reservations.insertOne({
+    "tourId": ObjectId("6637639fbbce22392efc6872"),
+    "personId": ObjectId("663760f1bbce22392efc686e"),
+    "seats": 2,
+    "price": 120,
+    "rating": 4
+})
+```
+![alt text](image-13.png)
+##### Wnioski
+Dodawanie nowej rezerwacji, gdzie w bazie danych nie ma jeszcze danych klienta, firmy, wyczieczki jest dużo ładwiejsze dla bazy danych _embedding_, natomiast minusem tego podejścia jest to, że dodająć kolejne osoby do tej samej wycieczki będziemu musieli powiecać dane firmy oraz tej wycieczki. 
+W bazie danych _references_ natomist musimy osobno dodać dane do każdej z kolekcji oraz zadbać o to aby kluczę obcne w relacjach były prawidłowe. Jednak dzięki temu unikamy duplikacji danych. 
+
 ---
 
 Punktacja:
