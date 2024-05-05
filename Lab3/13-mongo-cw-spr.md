@@ -109,19 +109,19 @@ class Program {
 }
 ```
 Przykład działania z dodawaniem nowego produktu:
-![alt text](image-3.png)
+![alt text](images/image-3.png)
 
 Przykład działania bez dodawania nowego produktu:
-![alt text](image-4.png)
+![alt text](images/image-4.png)
 
 Diagram bazy danych:
-![alt text](image-2.png)
+![alt text](images/image-2.png)
 
 Tabela Products w bazie danych:
-![alt text](image-5.png)
+![alt text](images/image-5.png)
 
 Tabela Suppliers w bazie danych:
-![alt text](image-6.png)
+![alt text](images/image-6.png)
 
 ---
 
@@ -154,6 +154,7 @@ public class Supplier {
 ```
 
 #### Program.cs
+
 Funkcje CreateProduct oraz CreateSupplier nie uległy zmianie
 ```cs
 static void Main() { 
@@ -189,16 +190,51 @@ static void Main() {
 }
 ```
 Przykład działania:
-![alt text](image-7.png)
+![alt text](images/image-7.png)
 
 Diagram bazy danych:
-![alt text](image-8.png)
+![alt text](images/image-8.png)
 Jak widać diagram nie uległ zmianie.
 
 Tabela Products w bazie danych:
-![alt text](image-9.png)
+![alt text](images/image-9.png)
 
 Tabela Suppliers w bazie danych:
-![alt text](image-10.png)
+![alt text](images/image-10.png)
 
 ---
+
+### c)
+
+#### Product.cs
+```cs
+public class Product {
+    public int ProductID { get; set; }
+    public Supplier? Supplier { get; set; }
+    public String? ProductName { get; set; } 
+    public int UnitsInStock { get; set; }
+}
+```
+
+#### Suppleir.cs
+Klasa ta wygląda tak samo jak w punckie b.
+
+#### Program.cs
+Klasa ta wygląda tak samo jak w punkcie b.
+
+Przykład działania:
+![alt text](images/image-11.png)
+
+Diagram bazy danych:
+![alt text](images/image-12.png)
+Jak widać diagram znów nie uległ zmianie.
+
+Tabela Products w bazie danych:
+![alt text](images/image-13.png)
+
+Tabela Suppliers w bazie danych:
+![alt text](images/image-14.png)
+
+---
+
+
