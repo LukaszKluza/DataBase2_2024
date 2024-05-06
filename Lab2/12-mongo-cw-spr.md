@@ -85,13 +85,13 @@ db.tip.aggregate([
       tip_count: 1
     }
   },
-//  {
-//    $sort: { 'tip_count': -1 }
-//  }
+  {
+    $sort: { 'tip_count': -1 }
+  }
 ])
 ```
 
-![alt text](images/image-23.png)
+![alt text](images\image-17_.png)
 
 ```js
 db.review.aggregate([
@@ -161,11 +161,13 @@ db.business.aggregate([
       average_stars: { $avg: "$reviews.stars" }
     }
   },
-//  {
-//    $sort: { "name": 1 }
-//  }
+  {
+    $sort: { "name": 1 }
+  }
 ])
 ```
+
+_tutaj najprawdopodobnie mieliśmy jakiś mały problem ponieważ zapytanie z sortowaniem nie dawało rezultatu_
 
 # Zadanie 2 - modelowanie danych
 
@@ -312,7 +314,7 @@ Reservations collection:
   "rating":4
 }
 ```
-![alt text](image.png)
+![alt text](images\image_.png)
 
 #### Wariant 2 (przykładowe dane):
 ```js
@@ -323,7 +325,7 @@ Companies collection:
   "location": "New York"
 }
 ```
-![alt text](image-1.png)
+![alt text](images\image-1_.png)
 ```js
 Tours collection:
 {
@@ -334,7 +336,7 @@ Tours collection:
   "duration": 3
 }
 ```
-![alt text](image-2.png)
+![alt text](images\image-2_.png)
 ```js
 Persons collection:
 {
@@ -343,7 +345,7 @@ Persons collection:
   "email": "john@example.com"
 }
 ```
-![alt text](image-3.png)
+![alt text](images\image-3_.png)
 ```js
 Reservations collection:
 {
@@ -355,7 +357,7 @@ Reservations collection:
   "rating": 4
 }
 ```
-![alt text](image-4.png)
+![alt text](images\image-4_.png)
 
 - **c.1** 
   Rozważmy zapytanie, które mam nam zwrócić wszystkie rezerwacje danej osoby które spełniją danę warunki: 
@@ -388,7 +390,7 @@ db.tours.find(
 )
 ```
 Jako rezultat dostaniemy: 
-![alt text](image-5.png)
+![alt text](images\image-5_.png)
 
 W drugim przypadku tym razem szukamy wszyskich rezerwacji osoby o imieniu: _Sophia Taylor_, zrealizowanych w firmie: _Adventures Unlimited LLC_ z ceną powyżej _75_ i _trwających _5_ dni. 
 
@@ -432,7 +434,7 @@ db.persons.aggregate([
     }
 ])
 ```
-![alt text](image-6.png)
+![alt text](images\image-6_.png)
 
 ##### Wnioski
 Mimo, że oba polecenie relizują dokładnie to samo zapytanie tylko z innymi parametrami ich kod jest zupełnie inny. W bazie danych typu _embedding_ jest on dużo krótszy
@@ -454,13 +456,13 @@ db.tours.aggregate([
   }
 ])
 ```
-![alt text](image-7.png)
+![alt text](images\image-7_.png)
 
 _references_
 ```js
 db.persons.distinct("name")
 ```
-![alt text](image-8.png)
+![alt text](images\image-8_.png)
 
 ##### Wnioski
 Do tego rodzaju zapytań lepiej sprawdzą się bazy typu _references_ ponieważ w nich z definicji dla każdego rodzaju danych mamy osobne kolekcje.
@@ -493,9 +495,9 @@ db.tours.insertOne(
     },
     "rating": 4
   },
-);
+)
 ```
-![alt text](image-9.png)
+![alt text](images\image-9_.png)
 
 
 _references_
@@ -505,7 +507,7 @@ db.companies.insertOne({
     "location": "Denver"
 })
 ```
-![alt text](image-10.png)
+![alt text](images\image-10_.png)
 
 ```js
 db.persons.insertOne({
@@ -513,7 +515,7 @@ db.persons.insertOne({
     "email": "david@example.com"
 })
 ```
-![alt text](image-11.png)
+![alt text](images\image-11_.png)
 
 
 ```js
@@ -524,7 +526,7 @@ db.tours.insertOne({
     "duration": 5
 })
 ```
-![alt text](image-12.png)
+![alt text](images\image-12_.png)
 
 ```js
 db.reservations.insertOne({
@@ -535,7 +537,7 @@ db.reservations.insertOne({
     "rating": 4
 })
 ```
-![alt text](image-13.png)
+![alt text](images\image-13_.png)
 ##### Wnioski
 Dodawanie nowej rezerwacji, gdzie w bazie danych nie ma jeszcze danych klienta, firmy, wyczieczki jest dużo ładwiejsze dla bazy danych _embedding_, natomiast minusem tego podejścia jest to, że dodająć kolejne osoby do tej samej wycieczki będziemu musieli powiecać dane firmy oraz tej wycieczki. 
 W bazie danych _references_ natomist musimy osobno dodać dane do każdej z kolekcji oraz zadbać o to aby kluczę obcne w relacjach były prawidłowe. Jednak dzięki temu unikamy duplikacji danych. 
@@ -584,7 +586,7 @@ db.tours.updateMany(
     }
 )
 ```
-![alt text](image-15.png)
+![alt text](images\image-15_.png)
 
 _references_
 ```js
@@ -598,7 +600,7 @@ db.companies.updateOne(
 )
 ```
 
-![alt text](image-16.png)
+![alt text](images\image-16_.png)
 
 ##### Wnioski
 Mimo tego że oba polecenia są do siebie bardzo podobne to jednak tego typu aktualizację są wydjaniejsze w bazie typu _references_ ponieważ wystarczy zaktualizować lokalizację jedynie w jednym rekodzie w przeciwieństwie do bazy _embedding_ gdzie jest potrzeba przeszukania każdje rezerwacji i zmian w wielu miejscach. 
