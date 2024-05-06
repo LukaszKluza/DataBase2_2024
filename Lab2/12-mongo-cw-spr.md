@@ -357,14 +357,14 @@ Reservations collection:
 ```
 ![alt text](image-4.png)
 
-- c.1 
-  Rozważmy zapytanie, które mam nam zwrócić wszystkie rezerwacje danej osoby ntóre spełniją danę warunki: 
+- **c.1** 
+  Rozważmy zapytanie, które mam nam zwrócić wszystkie rezerwacje danej osoby które spełniją danę warunki: 
   - muszą byc zrealizowane przez daną firmę
   - ich cena powinna być większa od zadanej
   - czas ich trwania musi być równy zadanemu
 
 Zrealizujemy teraz to zapytanie na dwóch bazach zaprojektowanych w różny spsób.
-W pierwszym przypadku szukamy wszyskich rezerwacji osoby o imieniu: _William Davis_, zrealizowanych w firmie: _City Explorations Inc. z ceną powyżej_ _130_ i _trwających _4_ dni. 
+W pierwszym przypadku szukamy wszyskich rezerwacji osoby o imieniu: _William Davis_, zrealizowanych w firmie: _City Explorations Inc. z ceną powyżej_ _130_ i trwających _4_ dni. 
 
 Takie zapytanie możemy zrealizować tym poleceniem
 
@@ -390,7 +390,7 @@ db.tours.find(
 Jako rezultat dostaniemy: 
 ![alt text](image-5.png)
 
-W drugim przypadku ym razem szukamy wszyskich rezerwacji osoby o imieniu: _Sophia Taylor_, zrealizowanych w firmie: _Adventures Unlimited LLC_ z ceną powyżej _75_ i _trwających _5_ dni. 
+W drugim przypadku tym razem szukamy wszyskich rezerwacji osoby o imieniu: _Sophia Taylor_, zrealizowanych w firmie: _Adventures Unlimited LLC_ z ceną powyżej _75_ i _trwających _5_ dni. 
 
 Teraz polecenie realozujące to zapytanie wygląda następująco: 
 
@@ -466,7 +466,7 @@ db.persons.distinct("name")
 Do tego rodzaju zapytań lepiej sprawdzą się bazy typu _references_ ponieważ w nich z definicji dla każdego rodzaju danych mamy osobne kolekcje.
 W bazie _embedding_ to zapytanie też nie jest skomplikowane ale operacja _grupowania_ może być bardziej czascohłonna niż _distinct_
 
-- c.3
+- **c.3**
 Dodawanie nowych danych: fimry, wycieczki, klienta, rezweracji:
 
 _embedding_
@@ -540,7 +540,75 @@ db.reservations.insertOne({
 Dodawanie nowej rezerwacji, gdzie w bazie danych nie ma jeszcze danych klienta, firmy, wyczieczki jest dużo ładwiejsze dla bazy danych _embedding_, natomiast minusem tego podejścia jest to, że dodająć kolejne osoby do tej samej wycieczki będziemu musieli powiecać dane firmy oraz tej wycieczki. 
 W bazie danych _references_ natomist musimy osobno dodać dane do każdej z kolekcji oraz zadbać o to aby kluczę obcne w relacjach były prawidłowe. Jednak dzięki temu unikamy duplikacji danych. 
 
+- **c.4**
+Usuwanie wcześniej dodanych danych 
+
+_embedding_ 
+
+```js
+db.tours.deleteOne({
+    _id : ObjectId("66375bf1bbce22392efc686a")
+})
+```
+
+_references_
+
+```js
+db.companies.deleteOne({
+    _id : ObjectId("66375ff0bbce22392efc686c")
+})
+db.persons.deleteOne({
+    _id : ObjectId("663760f1bbce22392efc686e")
+})
+db.tours.deleteOne({
+    _id : ObjectId("6637639fbbce22392efc6872")
+})
+db.reservations.deleteOne({
+    _id : ObjectId("6637659ebbce22392efc6874")
+})
+```
+##### Wnioski
+Usuwanie danych w oby tych bazach jest równie proste jednak w bazie typu _references_ wymaga więcej operacji, które jednak nie są przesadnie trudne. 
+
+- **c.5**
+Zamiana lokalizacji siedzimy firmy _City Tours Inc._ na _New York_
+
+_embedding_
+```js
+db.tours.updateMany(
+    {
+        "company.name" : "City Tours Inc."
+    },
+    {
+        $set: {"company.location" : "New York"}
+    }
+)
+```
+![alt text](image-15.png)
+
+_references_
+```js
+db.companies.updateOne(
+    {
+        "name" : "City Tours Inc."
+    },
+    {
+        $set: {"location" : "New York"}
+    }
+)
+```
+
+![alt text](image-16.png)
+
+##### Wnioski
+Mimo tego że oba polecenia są do siebie bardzo podobne to jednak tego typu aktualizację są wydjaniejsze w bazie typu _references_ ponieważ wystarczy zaktualizować lokalizację jedynie w jednym rekodzie w przeciwieństwie do bazy _embedding_ gdzie jest potrzeba przeszukania każdje rezerwacji i zmian w wielu miejscach. 
+
+_Zakładamy, że nazwy firm są unikalne_
 ---
+
+## Podsumowanie
+Przedstawiliśmy tutaj dwa zupełnie różne spodoby projektowania nierelacycjnych baz danych( _embedding_ , _references_). Jednak ciężko jednoznaczenie wskazać który sposób jest lepszy a który gorszy. Oba te podejście mają swoje wady i zalety a najważniejsze wydaje się być to aby dobierać model dabych do konkretnego problemu. Dobrym pomysłem też mogłoby być połączenie ze sobą tych dwóch modeli tak aby połączyć ich największe zalety.
+
 
 Punktacja:
 
