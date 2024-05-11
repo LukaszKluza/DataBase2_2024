@@ -616,7 +616,7 @@ Tabela Companies w bazie danych:
 
 #### Company.cs
 ```cs
-public abstract class Company {
+public class Company {
     public int CompanyID { get; set; }
     public String? CompanyName { get; set; }
     public String? Street { get; set; } 
@@ -632,26 +632,23 @@ public abstract class Company {
 ```
 
 #### Supplier.cs
-```cs
-public class Supplier : Company {
-    public String? BankAccountNumber { get; set; }
-}
-```
+Taki sam jak w punkcie e.
 
 #### Customer.cs
-```cs
-public class Customer : Company {
-    public float Discount { get; set; }
-}
-```
+Taki sam jak w punkcie e.
 
 #### ProdContext.cs
 ```cs
 public class ProdContext : DbContext
 {
-    public DbSet<Company>? Companies { get; set; }
-    public DbSet<Supplier>? Suppliers { get; set; }
-    public DbSet<Customer>? Customers { get; set; }
+    public DbSet<Company> Companies { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<Customer> Customers { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Company>().UseTptMappingStrategy();
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -662,78 +659,8 @@ public class ProdContext : DbContext
 ```
 
 #### Program.cs
-```cs
-class Program
-{
-    static void Main()
-    {
-        ProdContext prodContext = new ProdContext();
+Taki sam jak w punkcie e.
 
-        Console.WriteLine("How many products do you want to add: ");
-        string? response = Console.ReadLine();
-        int num = 0;
-        if (response != null) num = Int32.Parse(response);
-
-        while(num>0)
-        {
-            Console.WriteLine("Enter company type (1 for Supplier, 2 for Customer): ");
-            string typeInput = Console.ReadLine();
-            if (typeInput == "1") 
-            {
-                var supplier = new Supplier();
-                GetCompanyDetails(supplier);
-                Console.WriteLine("Enter bank account number: ");
-                supplier.BankAccountNumber = Console.ReadLine();
-                prodContext.Companies.Add(supplier);
-            }
-            else if (typeInput == "2") 
-            {
-                var customer = new Customer();
-                GetCompanyDetails(customer);
-                Console.WriteLine("Enter discount: ");
-                if (float.TryParse(Console.ReadLine(), out float discount)) 
-                {
-                    customer.Discount = discount;
-                }
-                else 
-                {
-                    Console.WriteLine("Invalid discount, setting to 0.");
-                    customer.Discount = 0;
-                }
-                prodContext.Companies.Add(customer);
-            }
-            else 
-            {
-                Console.WriteLine("Invalid company type.");
-                return;
-            }
-
-            prodContext.SaveChanges();
-            num--;
-        }
-
-        Console.WriteLine("Companies added successfully.");
-        
-        var companies = prodContext.Companies.ToList();
-        foreach (var company in companies)
-        {
-            Console.WriteLine($"Company ID: {company.CompanyID}, Name: {company.CompanyName}, Type: {company.GetType().Name}");
-        } 
-    }
-
-    static void GetCompanyDetails(Company company)
-    {
-        Console.WriteLine("Enter company name:");
-        company.CompanyName = Console.ReadLine();
-        Console.WriteLine("Enter street:");
-        company.Street = Console.ReadLine();
-        Console.WriteLine("Enter city:");
-        company.City = Console.ReadLine();
-        Console.WriteLine("Enter zip code:");
-        company.ZipCode = Console.ReadLine();
-    }
-}
-```
 Przykład działania:
 ![alt text](image-28.png)
 ![alt text](image-30.png)
@@ -752,3 +679,29 @@ Tabela Customers w bazie danych:
 ![alt text](image-33.png)
 
 ---
+
+### g)
+
+#### Table-Per-Type (TPT):
+
+- **Opis:** W strategii TPT każda klasa w hierarchii dziedziczenia mapowana jest do oddzielnej tabeli w bazie danych. Oznacza to, że tabela dla klasy bazowej nie jest tworzona, a każda klasa dziedzicząca ma swoją własną tabelę, która zawiera wszystkie jej właściwości, wraz z właściwościami odziedziczonymi po klasie bazowej.
+  
+- **Zalety:**
+  - Rozdzielenie danych: Każda tabela przechowuje dane tylko dla jednej konkretnej klasy, co prowadzi do klarownego przechowywania danych.
+  - Łatwe dodawanie nowych klas: Można łatwo dodać nowe klasy do hierarchii dziedziczenia, a EF Core automatycznie utworzy dla nich odpowiednie tabele.
+  
+- **Wady:**
+  - Zbędna zduplikowana informacja: W tabelach dla klas pochodnych mogą wystąpić puste kolumny, które odzwierciedlają właściwości odziedziczone po klasie bazowej, co może prowadzić do niepotrzebnego zużycia miejsca.
+  - Zmiana hierarchii dziedziczenia: Jeśli istnieje potrzeba zmiany hierarchii dziedziczenia, może to wymagać zmiany struktury tabel w bazie danych.
+
+#### Table-Per-Hierarchy (TPH):
+
+- **Opis:** W strategii TPH wszystkie klasy w hierarchii dziedziczenia mapowane są do jednej tabeli w bazie danych. Tabela ta zawiera kolumny dla wszystkich właściwości wszystkich klas w hierarchii, a dodatkowy wskaźnik typu określa typ rekordu.
+
+- **Zalety:**
+  - Mniejsza liczba tabel: Dzięki temu, że wszystkie dane są przechowywane w jednej tabeli, struktura bazy danych jest prostsza.
+  - Mniejsza redundancja danych: W tabeli występuje mniej pustych kolumn, co oznacza mniejsze zużycie miejsca.
+  
+- **Wady:**
+  - Mniejsza klarowność danych: W przypadku dużej ilości klas w hierarchii, tabela może stać się bardziej złożona i trudniejsza do analizy.
+  - Mniejsza wydajność: W przypadku dużej ilości klas w hierarchii, zapytania mogą wymagać bardziej złożonych operacji filtrowania w celu pobrania konkretnych typów danych.
