@@ -109,19 +109,19 @@ class Program {
 }
 ```
 Przykład działania z dodawaniem nowego produktu:
-![alt text](images/image-3.png)
+![alt text](image-3.png)
 
 Przykład działania bez dodawania nowego produktu:
-![alt text](images/image-4.png)
+![alt text](image-4.png)
 
 Diagram bazy danych:
-![alt text](images/image-2.png)
+![alt text](image-2.png)
 
 Tabela Products w bazie danych:
-![alt text](images/image-5.png)
+![alt text](image-5.png)
 
 Tabela Suppliers w bazie danych:
-![alt text](images/image-6.png)
+![alt text](image-6.png)
 
 ---
 
@@ -190,17 +190,17 @@ static void Main() {
 }
 ```
 Przykład działania:
-![alt text](images/image-7.png)
+![alt text](image-7.png)
 
 Diagram bazy danych:
-![alt text](images/image-8.png)
+![alt text](image-8.png)
 Jak widać diagram nie uległ zmianie.
 
 Tabela Products w bazie danych:
-![alt text](images/image-9.png)
+![alt text](image-9.png)
 
 Tabela Suppliers w bazie danych:
-![alt text](images/image-10.png)
+![alt text](image-10.png)
 
 ---
 
@@ -223,18 +223,256 @@ Klasa ta wygląda tak samo jak w punckie b.
 Klasa ta wygląda tak samo jak w punkcie b.
 
 Przykład działania:
-![alt text](images/image-11.png)
+![alt text](image-11.png)
 
 Diagram bazy danych:
-![alt text](images/image-12.png)
+![alt text](image-12.png)
 Jak widać diagram znów nie uległ zmianie.
 
 Tabela Products w bazie danych:
-![alt text](images/image-13.png)
+![alt text](image-13.png)
 
 Tabela Suppliers w bazie danych:
-![alt text](images/image-14.png)
+![alt text](image-14.png)
 
 ---
 
+### d)
 
+#### Product.cs
+```cs
+public class Product {
+    public int ProductID { get; set; }
+    public virtual ICollection<InvoiceProduct>? InvoiceProducts { get; set; }
+    public String? ProductName { get; set; } 
+    public int UnitsInStock { get; set; }
+}
+```
+
+#### Invoice.cs
+```cs
+public class Invoice {
+    [Key]
+    public int InvoiceNumber { get; set; }
+    public virtual ICollection<InvoiceProduct>? InvoiceProducts { get; set; }
+```
+
+#### InvoiceProduct.cs
+```cs
+public class InvoiceProduct {
+    [Key, Column(Order = 0)]
+    public int InvoiceID { get; set; }
+    public virtual Invoice Invoice { get; set; }
+
+    [Key, Column(Order = 1)]
+    public int ProductID { get; set; }
+    public virtual Product Product { get; set; }
+
+    public int Quantity { get; set; }
+}
+}
+```
+
+#### ProdContext.cs
+```cs
+public class ProdContext : DbContext
+{
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Invoice> Invoices { get; set; }
+    public DbSet<InvoiceProduct> InvoiceProducts { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<InvoiceProduct>()
+            .HasKey(ip => new { ip.InvoiceID, ip.ProductID });
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseSqlite("Datasource=MyProductDatabase");
+    }
+}
+```
+
+#### Program.cs
+```cs
+class Program
+{
+    static void Main()
+    {
+        ProdContext prodContext = new ProdContext();
+
+        Console.WriteLine("How many products do you want to add: ");
+        string? response = Console.ReadLine();
+        int num = 0;
+        if (response != null) num = Int32.Parse(response);
+
+        while (num > 0)
+        {
+            Product product = CreateProduct();
+            prodContext.Products.Add(product);
+            prodContext.SaveChanges();
+            num--;
+        }
+
+        Console.WriteLine("How many transactions do you want to add: ");
+        response = Console.ReadLine();
+        num = 0;
+        if (response != null) num = Int32.Parse(response);
+
+        while (num > 0)
+        {
+            Console.WriteLine("Listing all products with their units in stock");
+            var query = from prod in prodContext.Products
+                        select new
+                        {
+                            prod.ProductID,
+                            prod.ProductName,
+                            prod.UnitsInStock,
+                        };
+
+            foreach (var prod in query)
+            {
+                Console.WriteLine($"[{prod.ProductID}] | {prod.ProductName} | {prod.UnitsInStock}");
+            }
+
+            Invoice invoice = CreateInvoice(prodContext);
+            prodContext.Invoices.Add(invoice);
+            prodContext.SaveChanges();
+            num--;
+        }
+
+        Console.WriteLine("Enter the invoice number: ");
+        int invoiceNumber = int.Parse(Console.ReadLine());
+        ShowProductsSoldInInvoice(prodContext, invoiceNumber);
+
+        Console.WriteLine("Enter the product ID: ");
+        int productID = int.Parse(Console.ReadLine());
+        ShowInvoicesForProduct(prodContext, productID);
+    }
+
+    private static Product CreateProduct()
+    {
+        Console.WriteLine("Write new product name: ");
+        string? prodName = Console.ReadLine();
+        Product product = new Product { ProductName = prodName };
+        Console.WriteLine("Write new product units in stock: ");
+        string? units = Console.ReadLine();
+        if (units != null)
+        {
+            int prodUnits = Int32.Parse(units);
+            product.UnitsInStock = prodUnits;
+        }
+        return product;
+    }
+
+    private static Invoice CreateInvoice(ProdContext prodContext)
+    {
+        Invoice invoice = new Invoice();
+        invoice.InvoiceProducts = new List<InvoiceProduct>();
+
+        Console.WriteLine("How many products do you want to buy: ");
+        string? response = Console.ReadLine();
+        int num = 0;
+        if (response != null) num = Int32.Parse(response);
+
+        while (num > 0)
+        {
+            Console.WriteLine("Write index of product you want to buy: ");
+            string? index = Console.ReadLine();
+            if (index != null)
+            {
+                int i = Int32.Parse(index);
+                Console.WriteLine("Write how much of product you want to buy: ");
+                string? count = Console.ReadLine();
+                if (count != null)
+                {
+                    int c = Int32.Parse(count);
+                    var product = prodContext.Products.FirstOrDefault(prod => prod.ProductID == i);
+                    if (product != null)
+                    {
+                        if (product.UnitsInStock >= c)
+                        {
+                            InvoiceProduct invoiceProduct = new InvoiceProduct
+                            {
+                                Product = product,
+                                Quantity = c
+                            };
+                            invoice.InvoiceProducts.Add(invoiceProduct);
+
+                            product.UnitsInStock -= c;
+                            Console.WriteLine("Product added to transaction.");
+                            num--;
+                        }
+                        else
+                        {
+                            Console.WriteLine("There is not enough product units in stock.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Product with this index doesn't exist.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("That is not a number.");
+                }
+            }
+        }
+
+        return invoice;
+    }
+
+    static void ShowProductsSoldInInvoice(ProdContext prodContext, int invoiceNumber)
+    {
+        var productsInInvoice = prodContext.InvoiceProducts
+            .Include(ip => ip.Product)
+            .Where(ip => ip.InvoiceNumber == invoiceNumber)
+            .ToList();
+
+        Console.WriteLine($"\nProducts sold within the invoice {invoiceNumber}:");
+        foreach (var item in productsInInvoice)
+        {
+            Console.WriteLine($"- Product ID: {item.ProductID}, Name: {item.Product.ProductName}, Quantity: {item.Quantity}");
+        }
+    }
+
+    static void ShowInvoicesForProduct(ProdContext prodContext, int productID)
+    {
+        var invoicesForProduct = prodContext.InvoiceProducts
+            .Include(ip => ip.Invoice)
+            .Where(ip => ip.ProductID == productID)
+            .Select(ip => ip.InvoiceNumber)
+            .Distinct()
+            .ToList();
+
+        Console.WriteLine($"\nInvoices in which the product with ID {productID} was sold:");
+        foreach (var invoiceNumber in invoicesForProduct)
+        {
+            Console.WriteLine($"- Invoice Number: {invoiceNumber}");
+        }
+    }
+}
+```
+
+Przykład działania:
+![alt text](image-15.png)
+![alt text](image-16.png)
+![alt text](image-17.png)
+![alt text](image-18.png)
+
+Diagram bazy danych:
+![alt text](image-19.png)
+
+Tabela Products w bazie danych:
+![alt text](image-20.png)
+
+Tabela Invoices w bazie danych:
+![alt text](image-21.png)
+
+Tabela InvoiceProducts w bazie danych:
+![alt text](image-22.png)
+
+---
