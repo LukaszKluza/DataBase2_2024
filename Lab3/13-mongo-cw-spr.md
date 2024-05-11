@@ -476,3 +476,279 @@ Tabela InvoiceProducts w bazie danych:
 ![alt text](image-22.png)
 
 ---
+
+### e)
+
+#### Company.cs
+```cs
+public abstract class Company {
+    public int CompanyID { get; set; }
+    public String? CompanyName { get; set; }
+    public String? Street { get; set; } 
+    public String? City { get; set; } 
+    public String? ZipCode { get; set; } 
+    
+    public override string ToString()
+    {
+        if (CompanyName != null)return CompanyName;
+        else return "Unknow";
+    }
+}
+```
+
+#### Supplier.cs
+```cs
+public class Supplier : Company {
+    public String? BankAccountNumber { get; set; }
+}
+```
+
+#### Customer.cs
+```cs
+public class Customer : Company {
+    public float Discount { get; set; }
+}
+```
+
+#### ProdContext.cs
+```cs
+public class ProdContext : DbContext
+{
+    public DbSet<Company>? Companies { get; set; }
+    public DbSet<Supplier>? Suppliers { get; set; }
+    public DbSet<Customer>? Customers { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseSqlite("Datasource=MyProductDatabase");
+    }
+}
+```
+
+#### Program.cs
+```cs
+class Program
+{
+    static void Main()
+    {
+        ProdContext prodContext = new ProdContext();
+
+        Console.WriteLine("How many products do you want to add: ");
+        string? response = Console.ReadLine();
+        int num = 0;
+        if (response != null) num = Int32.Parse(response);
+
+        while(num>0)
+        {
+            Console.WriteLine("Enter company type (1 for Supplier, 2 for Customer): ");
+            string typeInput = Console.ReadLine();
+            if (typeInput == "1") 
+            {
+                var supplier = new Supplier();
+                GetCompanyDetails(supplier);
+                Console.WriteLine("Enter bank account number: ");
+                supplier.BankAccountNumber = Console.ReadLine();
+                prodContext.Companies.Add(supplier);
+            }
+            else if (typeInput == "2") 
+            {
+                var customer = new Customer();
+                GetCompanyDetails(customer);
+                Console.WriteLine("Enter discount: ");
+                if (float.TryParse(Console.ReadLine(), out float discount)) 
+                {
+                    customer.Discount = discount;
+                }
+                else 
+                {
+                    Console.WriteLine("Invalid discount, setting to 0.");
+                    customer.Discount = 0;
+                }
+                prodContext.Companies.Add(customer);
+            }
+            else 
+            {
+                Console.WriteLine("Invalid company type.");
+                return;
+            }
+
+            prodContext.SaveChanges();
+            num--;
+        }
+
+        Console.WriteLine("Companies added successfully.");
+        
+        var companies = prodContext.Companies.ToList();
+        foreach (var company in companies)
+        {
+            Console.WriteLine($"Company ID: {company.CompanyID}, Name: {company.CompanyName}, Type: {company.GetType().Name}");
+        } 
+    }
+
+    static void GetCompanyDetails(Company company)
+    {
+        Console.WriteLine("Enter company name:");
+        company.CompanyName = Console.ReadLine();
+        Console.WriteLine("Enter street:");
+        company.Street = Console.ReadLine();
+        Console.WriteLine("Enter city:");
+        company.City = Console.ReadLine();
+        Console.WriteLine("Enter zip code:");
+        company.ZipCode = Console.ReadLine();
+    }
+}
+```
+Przykład działania:
+![alt text](image-23.png)
+![alt text](image-24.png)
+![alt text](image-25.png)
+
+Diagram bazy danych:
+![alt text](image-26.png)
+
+Tabela Companies w bazie danych:
+![alt text](image-27.png)
+
+---
+
+### f)
+
+#### Company.cs
+```cs
+public abstract class Company {
+    public int CompanyID { get; set; }
+    public String? CompanyName { get; set; }
+    public String? Street { get; set; } 
+    public String? City { get; set; } 
+    public String? ZipCode { get; set; } 
+    
+    public override string ToString()
+    {
+        if (CompanyName != null)return CompanyName;
+        else return "Unknow";
+    }
+}
+```
+
+#### Supplier.cs
+```cs
+public class Supplier : Company {
+    public String? BankAccountNumber { get; set; }
+}
+```
+
+#### Customer.cs
+```cs
+public class Customer : Company {
+    public float Discount { get; set; }
+}
+```
+
+#### ProdContext.cs
+```cs
+public class ProdContext : DbContext
+{
+    public DbSet<Company>? Companies { get; set; }
+    public DbSet<Supplier>? Suppliers { get; set; }
+    public DbSet<Customer>? Customers { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseSqlite("Datasource=MyProductDatabase");
+    }
+}
+```
+
+#### Program.cs
+```cs
+class Program
+{
+    static void Main()
+    {
+        ProdContext prodContext = new ProdContext();
+
+        Console.WriteLine("How many products do you want to add: ");
+        string? response = Console.ReadLine();
+        int num = 0;
+        if (response != null) num = Int32.Parse(response);
+
+        while(num>0)
+        {
+            Console.WriteLine("Enter company type (1 for Supplier, 2 for Customer): ");
+            string typeInput = Console.ReadLine();
+            if (typeInput == "1") 
+            {
+                var supplier = new Supplier();
+                GetCompanyDetails(supplier);
+                Console.WriteLine("Enter bank account number: ");
+                supplier.BankAccountNumber = Console.ReadLine();
+                prodContext.Companies.Add(supplier);
+            }
+            else if (typeInput == "2") 
+            {
+                var customer = new Customer();
+                GetCompanyDetails(customer);
+                Console.WriteLine("Enter discount: ");
+                if (float.TryParse(Console.ReadLine(), out float discount)) 
+                {
+                    customer.Discount = discount;
+                }
+                else 
+                {
+                    Console.WriteLine("Invalid discount, setting to 0.");
+                    customer.Discount = 0;
+                }
+                prodContext.Companies.Add(customer);
+            }
+            else 
+            {
+                Console.WriteLine("Invalid company type.");
+                return;
+            }
+
+            prodContext.SaveChanges();
+            num--;
+        }
+
+        Console.WriteLine("Companies added successfully.");
+        
+        var companies = prodContext.Companies.ToList();
+        foreach (var company in companies)
+        {
+            Console.WriteLine($"Company ID: {company.CompanyID}, Name: {company.CompanyName}, Type: {company.GetType().Name}");
+        } 
+    }
+
+    static void GetCompanyDetails(Company company)
+    {
+        Console.WriteLine("Enter company name:");
+        company.CompanyName = Console.ReadLine();
+        Console.WriteLine("Enter street:");
+        company.Street = Console.ReadLine();
+        Console.WriteLine("Enter city:");
+        company.City = Console.ReadLine();
+        Console.WriteLine("Enter zip code:");
+        company.ZipCode = Console.ReadLine();
+    }
+}
+```
+Przykład działania:
+![alt text](image-28.png)
+![alt text](image-30.png)
+![alt text](image-29.png)
+
+Diagram bazy danych:
+![alt text](image-31.png)
+
+Tabela Companies w bazie danych:
+![alt text](image-34.png)
+
+Tabela Suppliers w bazie danych:
+![alt text](image-32.png)
+
+Tabela Customers w bazie danych:
+![alt text](image-33.png)
+
+---
