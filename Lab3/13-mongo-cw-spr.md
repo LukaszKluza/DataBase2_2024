@@ -108,20 +108,31 @@ class Program {
     }
 }
 ```
-Przykład działania z dodawaniem nowego produktu:
-![alt text](image-3.png)
+Przykład działania z dodawaniem nowego produktu
+<div align="center">
+  <img src="images/image-3.png">
+</div>
 
-Przykład działania bez dodawania nowego produktu:
-![alt text](image-4.png)
+Przykład działania bez dodawania nowego produktu
+<div align="center">
+  <img src="images/image-4.png">
+</div>
 
-Diagram bazy danych:
-![alt text](image-2.png)
+Diagram bazy danych
+<div align="center">
+  <img src="images/image-2.png">
+</div>
 
-Tabela Products w bazie danych:
-![alt text](image-5.png)
+Tabela Products w bazie danych
+<div align="center">
+  <img src="images/image-5.png">
+</div>
 
-Tabela Suppliers w bazie danych:
-![alt text](image-6.png)
+Tabela Suppliers w bazie danych
+<div align="center">
+  <img src="images/image-6.png">
+</div>
+
 
 ---
 
@@ -190,17 +201,25 @@ static void Main() {
 }
 ```
 Przykład działania:
-![alt text](image-7.png)
+<div align="center">
+  <img src="images/image-7.png">
+</div>
 
 Diagram bazy danych:
-![alt text](image-8.png)
+<div align="center">
+  <img src="images/image-8.png">
+</div>
 Jak widać diagram nie uległ zmianie.
 
 Tabela Products w bazie danych:
-![alt text](image-9.png)
+<div align="center">
+  <img src="images/image-9.png">
+</div>
 
 Tabela Suppliers w bazie danych:
-![alt text](image-10.png)
+<div align="center">
+  <img src="images/image-10.png">
+</div>
 
 ---
 
@@ -223,17 +242,25 @@ Klasa ta wygląda tak samo jak w punckie b.
 Klasa ta wygląda tak samo jak w punkcie b.
 
 Przykład działania:
-![alt text](image-11.png)
+<div align="center">
+  <img src="images/image-11.png">
+</div>
 
 Diagram bazy danych:
-![alt text](image-12.png)
+<div align="center">
+  <img src="images/image-12.png">
+</div>
 Jak widać diagram znów nie uległ zmianie.
 
 Tabela Products w bazie danych:
-![alt text](image-13.png)
+<div align="center">
+  <img src="images/image-13.png">
+</div>
 
 Tabela Suppliers w bazie danych:
-![alt text](image-14.png)
+<div align="center">
+  <img src="images/image-14.png">
+</div>
 
 ---
 
@@ -458,22 +485,41 @@ class Program
 ```
 
 Przykład działania:
-![alt text](image-15.png)
-![alt text](image-16.png)
-![alt text](image-17.png)
-![alt text](image-18.png)
+<div align="center">
+  <img src="images/image-15.png">
+</div>
+
+<div align="center">
+  <img src="images/image-16.png">
+</div>
+
+<div align="center">
+  <img src="images/image-17.png">
+</div>
+
+<div align="center">
+  <img src="images/image-18.png">
+</div>
 
 Diagram bazy danych:
-![alt text](image-19.png)
+<div align="center">
+  <img src="images/image-19.png">
+</div>
 
 Tabela Products w bazie danych:
-![alt text](image-20.png)
+<div align="center">
+  <img src="images/image-20.png">
+</div>
 
 Tabela Invoices w bazie danych:
-![alt text](image-21.png)
+<div align="center">
+  <img src="images/image-21.png">
+</div>
 
 Tabela InvoiceProducts w bazie danych:
-![alt text](image-22.png)
+<div align="center">
+  <img src="images/image-22.png">
+</div>
 
 ---
 
@@ -600,15 +646,27 @@ class Program
 }
 ```
 Przykład działania:
-![alt text](image-23.png)
-![alt text](image-24.png)
-![alt text](image-25.png)
+<div align="center">
+  <img src="images/image-23.png">
+</div>
+
+<div align="center">
+  <img src="images/image-24.png">
+</div>
+
+<div align="center">
+  <img src="images/image-25.png">
+</div>
 
 Diagram bazy danych:
-![alt text](image-26.png)
+<div align="center">
+  <img src="images/image-26.png">
+</div>
 
 Tabela Companies w bazie danych:
-![alt text](image-27.png)
+<div align="center">
+  <img src="images/image-27.png">
+</div>
 
 ---
 
@@ -662,21 +720,37 @@ public class ProdContext : DbContext
 Taki sam jak w punkcie e.
 
 Przykład działania:
-![alt text](image-28.png)
-![alt text](image-30.png)
-![alt text](image-29.png)
+<div align="center">
+  <img src="images/image-28.png">
+</div>
+
+<div align="center">
+  <img src="images/image-30.png">
+</div>
+
+<div align="center">
+  <img src="images/image-29.png">
+</div>
 
 Diagram bazy danych:
-![alt text](image-31.png)
+<div align="center">
+  <img src="images/image-31.png">
+</div>
 
 Tabela Companies w bazie danych:
-![alt text](image-34.png)
+<div align="center">
+  <img src="images/image-34.png">
+</div>
 
 Tabela Suppliers w bazie danych:
-![alt text](image-32.png)
+<div align="center">
+  <img src="images/image-32.png">
+</div>
 
 Tabela Customers w bazie danych:
-![alt text](image-33.png)
+<div align="center">
+  <img src="images/image-33.png">
+</div>
 
 ---
 
