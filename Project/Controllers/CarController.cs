@@ -27,6 +27,28 @@ public class CarController : ControllerBase
         }
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateCar(int id, [FromBody] Car car)
+    {
+        try
+        {
+            var success = await _carService.UpdateCarAsync(id, car);
+            if (success)
+            {
+                return Ok($"Car with ID '{id}' updated successfully.");
+            }
+            else
+            {
+                return NotFound("Car not found.");
+            }
+           
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while updating the car: {ex.Message}");
+        }
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCar(int id)
     {

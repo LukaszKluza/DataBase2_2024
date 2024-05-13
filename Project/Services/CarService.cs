@@ -33,6 +33,42 @@ public class CarService : ICarService
         }
     }
 
+    public async Task<bool> UpdateCarAsync(int id, Car car)
+    {
+        try
+        {
+            var filter = Builders<Car>.Filter.Eq(c => c.Id, id);
+            
+            var originalCar = await _carCollection.Find(filter).FirstOrDefaultAsync();
+
+            if (originalCar == null)
+            {
+                _logger.LogWarning($"Car with ID '{id}' not found.");
+                return false;
+            }
+
+            car.Id = originalCar.Id;
+
+            var result = await _carCollection.ReplaceOneAsync(filter, car);
+
+            if (result.ModifiedCount > 0)
+            {
+                _logger.LogInformation($"Car with ID '{id}' updated successfully.");
+                return true;
+            }
+            else
+            {
+                _logger.LogWarning($"Car with ID '{id}' not found.");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while updating the car: {ex.Message}");
+            throw;
+        }
+    }
+
     public async Task<bool> DeleteCarAsync(int id)
     {
         try
