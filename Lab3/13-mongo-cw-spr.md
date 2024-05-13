@@ -36,7 +36,7 @@ class Program {
         prodContext.SaveChanges();
 
         var query = from prod in prodContext.Products
-                    select prod.ProductName,
+                    select prod.ProductName;
             
         foreach (var pName in query) {
             Console.WriteLine(pName);
@@ -57,6 +57,21 @@ class Program {
     }
 }
 ```
+
+Przykład działania:
+<div align="center">
+  <img src="images/image-37.png">
+</div>
+
+Diagram bazy danych:
+<div align="center">
+  <img src="images/image-35.png">
+</div>
+
+Tabela Products w bazie danych:
+<div align="center">
+  <img src="images/image-36.png">
+</div>
 
 
 ## Zadanie 2  - rozwiązanie
@@ -161,27 +176,27 @@ class Program {
     }
 }
 ```
-Przykład działania z dodawaniem nowego produktu
+Przykład działania z dodawaniem nowego produktu:
 <div align="center">
   <img src="images/image-3.png">
 </div>
 
-Przykład działania bez dodawania nowego produktu
+Przykład działania bez dodawania nowego produktu:
 <div align="center">
   <img src="images/image-4.png">
 </div>
 
-Diagram bazy danych
+Diagram bazy danych:
 <div align="center">
   <img src="images/image-2.png">
 </div>
 
-Tabela Products w bazie danych
+Tabela Products w bazie danych:
 <div align="center">
   <img src="images/image-5.png">
 </div>
 
-Tabela Suppliers w bazie danych
+Tabela Suppliers w bazie danych:
 <div align="center">
   <img src="images/image-6.png">
 </div>
