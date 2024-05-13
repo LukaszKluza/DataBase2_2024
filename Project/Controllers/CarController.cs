@@ -26,4 +26,25 @@ public class CarController : ControllerBase
             return StatusCode(500, $"An error occurred while creating the car: {ex.Message}");
         }
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteCar(int id)
+    {
+        try
+        {
+            var success = await _carService.DeleteCarAsync(id);
+            if (success)
+            {
+                return Ok("Car deleted successfully.");
+            }
+            else
+            {
+                return NotFound("Car not found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while deleting the car: {ex.Message}");
+        }
+    }
 }

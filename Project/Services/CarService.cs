@@ -32,4 +32,27 @@ public class CarService : ICarService
             throw;
         }
     }
+
+    public async Task<bool> DeleteCarAsync(int id)
+    {
+        try
+        {
+            var result = await _carCollection.DeleteOneAsync(car => car.Id == id);
+            if (result.DeletedCount > 0)
+            {
+                _logger.LogInformation($"Car with ID '{id}' deleted successfully.");
+                return true;
+            }
+            else
+            {
+                _logger.LogWarning($"Car with ID '{id}' not found.");
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while deleting the car: {ex.Message}");
+            throw;
+        }
+    }
 }
