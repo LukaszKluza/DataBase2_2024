@@ -2,6 +2,63 @@
 Łukasz Kluza, Mateusz Sacha
 --- 
 
+## Zadanie 1  - rozwiązanie
+
+#### Product.cs
+```cs
+public class Product {
+    public int ProductID { get; set; }
+    public String? ProductName { get; set; } 
+    public int UnitsInStock { get; set; }
+}
+```
+
+#### ProdContext.cs
+```cs
+public class ProdContext : DbContext
+{
+    public DbSet<Product> Products { get; set; }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        optionsBuilder.UseSqlite("Datasource=MyProductDatabase");
+    }
+}
+```
+
+#### Program.cs
+```cs
+class Program {
+    static void Main() { 
+        ProdContext prodContext = new ProdContext();
+        Product product = CreateProduct();
+        prodContext.Products.Add(product);
+        prodContext.SaveChanges();
+
+        var query = from prod in prodContext.Products
+                    select prod.ProductName,
+            
+        foreach (var pName in query) {
+            Console.WriteLine(pName);
+        }
+    }
+
+    private static Product CreateProduct(){
+        Console.WriteLine("Write new product name: ");
+        String? prodName = Console.ReadLine();
+        Product product = new Product { ProductName = prodName };
+        Console.WriteLine("Write new product units in stock: ");
+        String? units = Console.ReadLine();
+        if(units != null) {
+            int prodUnits = Int32.Parse(units);
+            product.UnitsInStock = prodUnits;
+        }
+        return product;
+    }
+}
+```
+
+
 ## Zadanie 2  - rozwiązanie
 
 ### a)
@@ -28,7 +85,6 @@ public class Supplier {
 
 #### ProdContext.cs
 ```cs
-using Microsoft.EntityFrameworkCore;
 public class ProdContext : DbContext
 {
     public DbSet<Product> Products { get; set; }
@@ -43,9 +99,6 @@ public class ProdContext : DbContext
 
 #### Program.cs
 ```cs
-using System;
-using System.Linq;
-
 class Program {
     static void Main() { 
         ProdContext prodContext = new ProdContext();
@@ -168,35 +221,37 @@ public class Supplier {
 
 Funkcje CreateProduct oraz CreateSupplier nie uległy zmianie
 ```cs
-static void Main() { 
-    ProdContext prodContext = new ProdContext();
+class Program {
+    static void Main() { 
+        ProdContext prodContext = new ProdContext();
 
-    Supplier supplier = CreateSupplier();
-    prodContext.Add(supplier);
-    prodContext.SaveChanges();
-
-    Console.WriteLine("How many products do you want to add: ");
-    String? response = Console.ReadLine();
-    int num = 0;
-    if(response != null) num = Int32.Parse(response);
-
-    while(num > 0) {
-        Product product = CreateProduct();
-        prodContext.Products.Add(product);
-        supplier.Products.Add(product);
+        Supplier supplier = CreateSupplier();
+        prodContext.Add(supplier);
         prodContext.SaveChanges();
-        num--;
-    }
-    
-    var query = from prod in prodContext.Products
-        select new
-        {
-            prod.ProductID,
-            prod.ProductName,
-        };
 
-    foreach (var prod in query) {
-        Console.WriteLine($"[{prod.ProductID}] | {prod.ProductName}");
+        Console.WriteLine("How many products do you want to add: ");
+        String? response = Console.ReadLine();
+        int num = 0;
+        if(response != null) num = Int32.Parse(response);
+
+        while(num > 0) {
+            Product product = CreateProduct();
+            prodContext.Products.Add(product);
+            supplier.Products.Add(product);
+            prodContext.SaveChanges();
+            num--;
+        }
+        
+        var query = from prod in prodContext.Products
+            select new
+            {
+                prod.ProductID,
+                prod.ProductName,
+            };
+
+        foreach (var prod in query) {
+            Console.WriteLine($"[{prod.ProductID}] | {prod.ProductName}");
+        }
     }
 }
 ```
@@ -210,6 +265,7 @@ Diagram bazy danych:
   <img src="images/image-8.png">
 </div>
 Jak widać diagram nie uległ zmianie.
+<br></br>
 
 Tabela Products w bazie danych:
 <div align="center">
@@ -251,6 +307,7 @@ Diagram bazy danych:
   <img src="images/image-12.png">
 </div>
 Jak widać diagram znów nie uległ zmianie.
+<br></br>
 
 Tabela Products w bazie danych:
 <div align="center">
@@ -758,24 +815,25 @@ Tabela Customers w bazie danych:
 
 #### Table-Per-Type (TPT):
 
-- **Opis:** W strategii TPT każda klasa w hierarchii dziedziczenia mapowana jest do oddzielnej tabeli w bazie danych. Oznacza to, że tabela dla klasy bazowej nie jest tworzona, a każda klasa dziedzicząca ma swoją własną tabelę, która zawiera wszystkie jej właściwości, wraz z właściwościami odziedziczonymi po klasie bazowej.
+- **Opis:** W strategii TPT, każda klasa w hierarchii dziedziczenia odpowiada osobnej tabeli w bazie danych. Dodatkowo, klasa podstawowa również ma swoją własną tabelę. Każda tabela podtypów zawiera kolumny odpowiadające właściwościom tego podtypu, a także klucz obcy do tabeli typów podstawowych, który identyfikuje odpowiedni wiersz w tabeli typów podstawowych dla każdego wiersza podtypu.
   
-- **Zalety:**
-  - Rozdzielenie danych: Każda tabela przechowuje dane tylko dla jednej konkretnej klasy, co prowadzi do klarownego przechowywania danych.
-  - Łatwe dodawanie nowych klas: Można łatwo dodać nowe klasy do hierarchii dziedziczenia, a EF Core automatycznie utworzy dla nich odpowiednie tabele.
-  
-- **Wady:**
-  - Zbędna zduplikowana informacja: W tabelach dla klas pochodnych mogą wystąpić puste kolumny, które odzwierciedlają właściwości odziedziczone po klasie bazowej, co może prowadzić do niepotrzebnego zużycia miejsca.
-  - Zmiana hierarchii dziedziczenia: Jeśli istnieje potrzeba zmiany hierarchii dziedziczenia, może to wymagać zmiany struktury tabel w bazie danych.
+
 
 #### Table-Per-Hierarchy (TPH):
 
 - **Opis:** W strategii TPH wszystkie klasy w hierarchii dziedziczenia mapowane są do jednej tabeli w bazie danych. Tabela ta zawiera kolumny dla wszystkich właściwości wszystkich klas w hierarchii, a dodatkowy wskaźnik typu określa typ rekordu.
 
-- **Zalety:**
-  - Mniejsza liczba tabel: Dzięki temu, że wszystkie dane są przechowywane w jednej tabeli, struktura bazy danych jest prostsza.
-  - Mniejsza redundancja danych: W tabeli występuje mniej pustych kolumn, co oznacza mniejsze zużycie miejsca.
+
+#### Porównanie:
+- **TPH:**
+  - Mniejsza liczba tabel -  dzięki temu, że wszystkie dane są przechowywane w jednej tabeli, struktura bazy danych jest prostsza.
+  - Mniejsza klarowność danych - w przypadku dużej ilości klas w hierarchii, tabela może stać się bardziej złożona i trudniejsza do analizy.
+  - Redundancja danych - niektóre kolumny dla określonych klas jednostek zawierają wartości NULL, a liczba tych kolumn zależy od liczby klas w hierarchii.
+
+- **TPT:**
+  - Rozdzielenie danych - każda tabela przechowuje dane tylko dla jednej konkretnej klasy, co prowadzi do klarownego przechowywania danych.
+  - Łatwe dodawanie nowych klas - można łatwo dodać nowe klasy do hierarchii dziedziczenia, a EF Core automatycznie utworzy dla nich odpowiednie tabele.
+  - Duża liczba tabel - struktura bazy jest bardziej złożona i powoduje to zmniejszenie wydajności operacji CRUD
   
-- **Wady:**
-  - Mniejsza klarowność danych: W przypadku dużej ilości klas w hierarchii, tabela może stać się bardziej złożona i trudniejsza do analizy.
-  - Mniejsza wydajność: W przypadku dużej ilości klas w hierarchii, zapytania mogą wymagać bardziej złożonych operacji filtrowania w celu pobrania konkretnych typów danych.
+- **Podsumowanie:**
+Oba podejścia dziedziczenia mają swoje wady i zalety, preferencja wyboru powinna raczej zależeć od tego jaką strukturę bazy danych uznamy za bardziej efektywną w danym projekcie.
