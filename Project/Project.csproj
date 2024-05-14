@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>NETSDK1080</NoWarn>
+    <NoWarn>AD0001</NoWarn>
+    <NoWarn>CS8618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

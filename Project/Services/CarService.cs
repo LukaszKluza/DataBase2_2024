@@ -37,7 +37,7 @@ public class CarService : ICarService
     {
         try
         {
-            var filter = Builders<Car>.Filter.Eq(c => c.Id, id);
+            var filter = Builders<Car>.Filter.Eq(car => car.Id, id);
             
             var originalCar = await _carCollection.Find(filter).FirstOrDefaultAsync();
 

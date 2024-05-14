@@ -22,11 +22,17 @@ public class Startup
         services.AddSingleton<MongoDbContext>();
 
         services.AddScoped<ICarService, CarService>();
+        services.AddScoped<ICarsModelsService, CarsModelsService>();
 
         services.AddScoped<IMongoCollection<Car>>(provider =>
         {
             var dbContext = provider.GetRequiredService<MongoDbContext>();
             return dbContext.GetCollection<Car>("Cars");
+        });
+        services.AddScoped<IMongoCollection<CarModel>>(provider =>
+        {
+            var dbContext = provider.GetRequiredService<MongoDbContext>();
+            return dbContext.GetCollection<CarModel>("CarsModels");
         });
     }
 
