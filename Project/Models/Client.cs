@@ -9,20 +9,20 @@ public class Client
     public string Id { get; set; }
 
     [BsonElement("first_name")]
-    public string? FirstName { get; set; }
+    public string? First_Name { get; set; }
 
     [BsonElement("last_name")]
-    public string? LastName { get; set; }
+    public string? Last_Name { get; set; }
 
     [BsonElement("phone_number")]
-    public string? PhoneNumber { get; set; }
+    public string? Phone_Number { get; set; }
 
     [BsonElement("gender")]
     public string? Gender { get; set; }
 
     [BsonElement("birth_day")]
     [BsonDateTimeOptions(DateOnly = true)]
-    public DateTime? BirthDay { get; set; }
+    public DateTime? Birth_Day { get; set; }
 
     [BsonElement("pesel")]
     public string? Pesel { get; set; }
@@ -41,8 +41,8 @@ public class Client
 
     [BsonElement("customer_since")]
     [BsonDateTimeOptions(DateOnly = true)]
-    public DateTime? CustomerSince { get; set; }
+    public DateTime? Customer_Since { get; set; }
 
     [BsonElement("total_rental_days")]
-    public int? TotalRentalDays { get; set; }
+    public int? Total_Rental_Days { get; set; }
 }

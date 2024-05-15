@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using MongoDB.Driver;
+
 
 [Route("api/[controller]")]
 [ApiController]
@@ -30,6 +33,9 @@ public class CarController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCar(int id, [FromBody] Car car)
     {
+        Console.WriteLine("Received JSON body:");
+        Console.WriteLine(JsonConvert.SerializeObject(car, Formatting.Indented));
+
         try
         {
             var success = await _carService.UpdateCarAsync(id, car);
@@ -69,4 +75,75 @@ public class CarController : ControllerBase
             return StatusCode(500, $"An error occurred while deleting the car: {ex.Message}");
         }
     }
+
+    // [HttpGet("Cars")]
+    // public async Task<IActionResult> GetCarsAsync(){
+    //     try
+    //     {
+    //         var result = await _carService.GetCarsAsync();
+    //         if (result.Any())
+    //         {
+    //             return Ok(result);
+    //         }
+    //         else{
+    //             return NotFound("Cars not found.");
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, $"An error occurred while retrieving cars:: {ex.Message}");
+    //     }
+    // }
+
+    [HttpGet("Cars")]
+    public async Task<IActionResult> GetCarsPerFilterAsync(int? modelId = null, int? seats = null, string? type = null, string? color = null, 
+    int? minPower = null, int? maxPower = null, int? minCurrMileage = null, int? maxCurrMileage = null,
+    int? minPricePerDay = null, int? maxPricePerDay = null, bool? isAvailable = null, int? minProductionYear = null, int? maxProductionYear = null)
+    {
+        try
+        {
+            var filterDefinitioinBuilder = Builders<Car>.Filter;
+            var filter = Builders<Car>.Filter.Empty;
+
+            if(modelId.HasValue){
+                filter &= filterDefinitioinBuilder.Eq(car => car._CarModelId, modelId.Value);
+            }
+            if(seats.HasValue){
+                filter &= filterDefinitioinBuilder.Eq(car => car.Seats, seats.Value);
+            }
+            if(!string.IsNullOrWhiteSpace(type)){
+                filter &= filterDefinitioinBuilder.Eq(car => car.Type, type);
+            }if(!string.IsNullOrWhiteSpace(color)){
+                filter &= filterDefinitioinBuilder.Eq(car => car.Color, color);
+            }
+            if(isAvailable.HasValue){
+                filter &= filterDefinitioinBuilder.Eq(car => car.IsAvailable, isAvailable.Value);
+            }
+            filter &= filterDefinitioinBuilder.Gte(car => car.Power, minPower ?? 0);
+            filter &= filterDefinitioinBuilder.Lte(car => car.Power, maxPower ?? int.MaxValue);
+
+            filter &= filterDefinitioinBuilder.Gte(car => car.Price_per_day, minPricePerDay ?? 0);
+            filter &= filterDefinitioinBuilder.Lte(car => car.Price_per_day, maxPricePerDay ?? int.MaxValue);
+
+            filter &= filterDefinitioinBuilder.Gte(car => car.Curr_mileage, minCurrMileage ?? 0);
+            filter &= filterDefinitioinBuilder.Lte(car => car.Curr_mileage, maxCurrMileage ?? int.MaxValue);
+
+            filter &= filterDefinitioinBuilder.Gte(car => car.Production_year, minProductionYear ?? 1900);
+            filter &= filterDefinitioinBuilder.Lte(car => car.Production_year, maxProductionYear ?? 2100);
+            
+            var result = await _carService.GetCarsPerFilterAsync(filter);
+            if (result.Any())
+            {
+                return Ok(result);
+            }
+            else{
+                return NotFound("Cars not found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while retrieving cars:: {ex.Message}");
+        }
+    }
+
 }

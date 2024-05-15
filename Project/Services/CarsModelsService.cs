@@ -37,7 +37,7 @@ public class CarsModelsService : ICarsModelsService
     {
         try
         {
-            var filter = Builders<CarModel>.Filter.Eq(carModel => carModel.Id, id);
+            var filter = Builders<CarModel>.Filter.Eq(carModel => carModel._id, id);
             
             var originalCarModel = await _carModelCollection.Find(filter).FirstOrDefaultAsync();
 
@@ -47,7 +47,7 @@ public class CarsModelsService : ICarsModelsService
                 return false;
             }
 
-            carModel.Id = originalCarModel.Id;
+            carModel._id = originalCarModel._id;
 
             var result = await _carModelCollection.ReplaceOneAsync(filter, carModel);
 
@@ -73,7 +73,7 @@ public class CarsModelsService : ICarsModelsService
     {
        try
        {
-            var result = await _carModelCollection.DeleteOneAsync(carModel => carModel.Id == id);
+            var result = await _carModelCollection.DeleteOneAsync(carModel => carModel._id == id);
             if (result.DeletedCount > 0)
             {
                 _logger.LogInformation($"Car model with ID '{id}' deleted successfully.");

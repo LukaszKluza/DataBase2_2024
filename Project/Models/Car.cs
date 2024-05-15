@@ -5,10 +5,10 @@ public class Car
 {
     [BsonId]
     [BsonElement("_id")]
-    public int Id { get; set; } 
+    public int _id { get; set; } 
 
     [BsonElement("_carModelId")]
-    public int CarModelId { get; set; }
+    public int _CarModelId { get; set; }
 
     [BsonElement("seats")]
     public int Seats { get; set; }
@@ -23,14 +23,14 @@ public class Car
     public int Power { get; set; }
 
     [BsonElement("curr_mileage")]
-    public int CurrentMileage { get; set; }
+    public int Curr_mileage { get; set; }
 
     [BsonElement("price_per_day")]
-    public int PricePerDay { get; set; }
+    public int Price_per_day { get; set; }
 
     [BsonElement("isAvailable")]
     public bool IsAvailable { get; set; }
 
     [BsonElement("production_year")]
-    public int ProductionYear { get; set; }
+    public int Production_year { get; set; }
 }

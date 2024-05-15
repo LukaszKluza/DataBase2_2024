@@ -5,7 +5,7 @@ public class CarModel
 {
     [BsonId]
     [BsonElement("_id")]
-    public int Id { get; set; }
+    public int _id { get; set; }
 
     [BsonElement("mark")]
     public string Mark { get; set; }

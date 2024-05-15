@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using System.Threading.Tasks;
+
 
 public class CarService : ICarService
 {
@@ -37,7 +40,7 @@ public class CarService : ICarService
     {
         try
         {
-            var filter = Builders<Car>.Filter.Eq(car => car.Id, id);
+            var filter = Builders<Car>.Filter.Eq(car => car._id, id);
             
             var originalCar = await _carCollection.Find(filter).FirstOrDefaultAsync();
 
@@ -47,7 +50,7 @@ public class CarService : ICarService
                 return false;
             }
 
-            car.Id = originalCar.Id;
+            car._id = originalCar._id;
 
             var result = await _carCollection.ReplaceOneAsync(filter, car);
 
@@ -73,7 +76,7 @@ public class CarService : ICarService
     {
         try
         {
-            var result = await _carCollection.DeleteOneAsync(car => car.Id == id);
+            var result = await _carCollection.DeleteOneAsync(car => car._id == id);
             if (result.DeletedCount > 0)
             {
                 _logger.LogInformation($"Car with ID '{id}' deleted successfully.");
@@ -88,6 +91,34 @@ public class CarService : ICarService
         catch (Exception ex)
         {
             _logger.LogError($"An error occurred while deleting the car: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<Car>> GetCarsAsync()
+    {
+        try
+        {
+            var result = await _carCollection.Find(_ => true).ToListAsync();
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while retrieving cars: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<Car>> GetCarsPerFilterAsync(FilterDefinition<Car> filter)
+    {
+        try
+        {
+            var result = await _carCollection.Find(filter).ToListAsync();
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while retrieving cars: {ex.Message}");
             throw;
         }
     }
