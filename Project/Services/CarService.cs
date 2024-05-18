@@ -95,20 +95,6 @@ public class CarService : ICarService
         }
     }
 
-    public async Task<IEnumerable<Car>> GetCarsAsync()
-    {
-        try
-        {
-            var result = await _carCollection.Find(_ => true).ToListAsync();
-            return result;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"An error occurred while retrieving cars: {ex.Message}");
-            throw;
-        }
-    }
-
     public async Task<IEnumerable<Car>> GetCarsPerFilterAsync(FilterDefinition<Car> filter)
     {
         try

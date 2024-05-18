@@ -23,6 +23,8 @@ public class Startup
 
         services.AddScoped<ICarService, CarService>();
         services.AddScoped<ICarsModelsService, CarsModelsService>();
+        services.AddScoped<IRentalService, RentalService>();
+        services.AddScoped<IClientService, ClientService>();
 
         services.AddScoped<IMongoCollection<Car>>(provider =>
         {
@@ -33,6 +35,16 @@ public class Startup
         {
             var dbContext = provider.GetRequiredService<MongoDbContext>();
             return dbContext.GetCollection<CarModel>("CarsModels");
+        });
+        services.AddScoped<IMongoCollection<Rental>>(provider =>
+        {
+            var dbContext = provider.GetRequiredService<MongoDbContext>();
+            return dbContext.GetCollection<Rental>("Rentals");
+        });
+        services.AddScoped<IMongoCollection<Client>>(provider =>
+        {
+            var dbContext = provider.GetRequiredService<MongoDbContext>();
+            return dbContext.GetCollection<Client>("Clients");
         });
     }
 

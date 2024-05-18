@@ -75,26 +75,7 @@ public class CarController : ControllerBase
             return StatusCode(500, $"An error occurred while deleting the car: {ex.Message}");
         }
     }
-
-    // [HttpGet("Cars")]
-    // public async Task<IActionResult> GetCarsAsync(){
-    //     try
-    //     {
-    //         var result = await _carService.GetCarsAsync();
-    //         if (result.Any())
-    //         {
-    //             return Ok(result);
-    //         }
-    //         else{
-    //             return NotFound("Cars not found.");
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return StatusCode(500, $"An error occurred while retrieving cars:: {ex.Message}");
-    //     }
-    // }
-
+    
     [HttpGet("Cars")]
     public async Task<IActionResult> GetCarsPerFilterAsync(int? modelId = null, int? seats = null, string? type = null, string? color = null, 
     int? minPower = null, int? maxPower = null, int? minCurrMileage = null, int? maxCurrMileage = null,

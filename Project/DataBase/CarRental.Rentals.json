@@ -1,1 +1,74 @@
-[]
+[{
+  "_id": 0,
+  "rental_car": {
+    "carId": 0,
+    "make": "Toyota",
+    "model": "Corolla",
+    "price_per_day": 120
+  },
+  "customer": {
+    "clientId": 0,
+    "first_name": "John",
+    "last_name": "Wick"
+  },
+  "rental_details": {
+    "start_date": {
+      "$date": "2024-05-12T12:00:00.000Z"
+    },
+    "expected_end_date": {
+      "$date": "2024-05-17T12:00:00.000Z"
+    },
+    "end_date": {
+      "$date": "2024-05-18T10:08:55.906Z"
+    },
+    "rental_status": "finished",
+    "insurance_type": "full",
+    "extra_insurance_amount": 100,
+    "days": 6,
+    "extra_days_amount": 60,
+    "mileage": 550,
+    "extra_mileage_amount": 0,
+    "extra_fuel": 0,
+    "extra_fuel_amount": 0,
+    "price": 600,
+    "discount": 0.1,
+    "extra_amount": 160,
+    "final_amount": 700
+  }
+},
+{
+  "_id": 1,
+  "rental_car": {
+    "carId": 1,
+    "make": "Toyota",
+    "model": "Corolla",
+    "price_per_day": 130
+  },
+  "customer": {
+    "clientId": 1,
+    "first_name": "Alice",
+    "last_name": "Johnson"
+  },
+  "rental_details": {
+    "start_date": {
+      "$date": "2024-05-14T12:00:00.000Z"
+    },
+    "expected_end_date": {
+      "$date": "2024-05-20T12:00:00.000Z"
+    },
+    "end_date": null,
+    "rental_status": "ongoing",
+    "insurance_type": "standard",
+    "extra_insurance_amount": 80,
+    "days": 6,
+    "extra_days_amount": 0,
+    "mileage": 900,
+    "extra_mileage_amount": 0,
+    "extra_fuel": 0,
+    "extra_fuel_amount": 0,
+    "price": 780,
+    "discount": 0,
+    "extra_amount": 0,
+    "final_amount": 780
+  }
+}]
