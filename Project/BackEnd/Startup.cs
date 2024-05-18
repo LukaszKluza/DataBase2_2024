@@ -19,6 +19,18 @@ public class Startup
     {   
         services.AddControllersWithViews();
 
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAllOrigins",
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+                });
+        });
+        services.AddControllers();
+
         services.AddSingleton<MongoDbContext>();
 
         services.AddScoped<ICarService, CarService>();
@@ -63,16 +75,11 @@ public class Startup
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 
+        app.UseCors("AllowAllOrigins");
+
         app.UseRouting();
 
         app.UseAuthorization();
-
-        // app.UseEndpoints(endpoints =>
-        // {
-        //     endpoints.MapControllerRoute(
-        //         name: "default",
-        //         pattern: "{controller=Home}/{action=Index}/{id?}");
-        // });
 
         app.UseEndpoints(endpoints =>
         {
