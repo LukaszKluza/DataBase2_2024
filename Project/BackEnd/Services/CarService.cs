@@ -108,4 +108,12 @@ public class CarService : ICarService
             throw;
         }
     }
+
+    public async Task<Car> GetCarByIdAsync(int id)
+    {
+        var filter = Builders<Car>.Filter.Eq(car => car._id, id);
+        var car = await _carCollection.Find(filter).FirstOrDefaultAsync();
+        return car;
+    }
+
 }

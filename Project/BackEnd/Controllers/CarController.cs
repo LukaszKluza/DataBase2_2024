@@ -127,4 +127,26 @@ public class CarController : ControllerBase
         }
     }
 
+    [HttpGet("Cars/{id}")]
+    public async Task<IActionResult> GetCarByIdAsync(int id)
+    {
+        try
+        {
+            var car = await _carService.GetCarByIdAsync(id);
+            if (car != null)
+            {
+                return Ok(car);
+            }
+            else
+            {
+                return NotFound($"Car with ID {id} not found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while retrieving the car: {ex.Message}");
+        }
+    }
+
+
 }

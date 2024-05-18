@@ -1,0 +1,44 @@
+@page "/cars"
+@inject HttpClient HttpClient
+@using System.Text.Json
+@using System.Net.Http.Json
+
+<PageTitle>Cars</PageTitle>
+
+<h1>This is list of available cars.</h1>
+
+@if (cars == null)
+{
+    <p>Loading...</p>
+}
+else if (cars.Count == 0)
+{
+    <p>No cars available.</p>
+}
+else
+{
+    <ul class="car-list">
+        @foreach (var car in cars)
+        {
+            <li>
+                <a href="cars/@car._id">@car.Type - @car.Color</a>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<Car> cars;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            cars = await HttpClient.GetFromJsonAsync<List<Car>>("http://localhost:5000/api/car/Cars");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+}
