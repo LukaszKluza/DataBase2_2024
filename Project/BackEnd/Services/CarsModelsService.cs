@@ -91,4 +91,25 @@ public class CarsModelsService : ICarsModelsService
             throw;
        }
     }   
+
+    public async Task<IEnumerable<CarModel>> GetCarsModelsPerFilterAsync(FilterDefinition<CarModel> filter)
+    {
+        try
+        {
+            var result = await _carModelCollection.Find(filter).ToListAsync();
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while retrieving cars models: {ex.Message}");
+            throw;
+        }
+    }
+
+    public async Task<CarModel> GetCarModelByIdAsync(int id)
+    {
+        var filter = Builders<CarModel>.Filter.Eq(carModel => carModel._id, id);
+        var carModel = await _carModelCollection.Find(filter).FirstOrDefaultAsync();
+        return carModel;
+    }
 }

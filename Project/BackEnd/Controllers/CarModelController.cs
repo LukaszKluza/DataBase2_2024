@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using MongoDB.Driver;
+
 
 [Route("api/[controller]")]
 [ApiController]
@@ -68,6 +71,56 @@ public class CarModelController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, $"An error occurred while deleting the car model: {ex.Message}");
+        }
+    }
+
+    [HttpGet("Models")]
+    public async Task<IActionResult> GetCarsModelsPerFilterAsync(string? mark = null, string? model = null)
+    {
+        try
+        {
+            var filterDefinitioinBuilder = Builders<CarModel>.Filter;
+            var filter = Builders<CarModel>.Filter.Empty;
+
+            if(!string.IsNullOrWhiteSpace(mark)){
+                filter &= filterDefinitioinBuilder.Eq(carModel => carModel.Mark, mark);
+            }if(!string.IsNullOrWhiteSpace(model)){
+                filter &= filterDefinitioinBuilder.Eq(carModel => carModel.Model, model);
+            }
+            
+            var result = await _carsModelsService.GetCarsModelsPerFilterAsync(filter);
+            if (result.Any())
+            {
+                return Ok(result);
+            }
+            else{
+                return NotFound("Cars models not found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while retrieving cars models:: {ex.Message}");
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetCarByIdAsync(int id)
+    {
+        try
+        {
+            var carModel = await _carsModelsService.GetCarModelByIdAsync(id);
+            if (carModel != null)
+            {
+                return Ok(carModel);
+            }
+            else
+            {
+                return NotFound($"Car model with ID {id} not found.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred while retrieving the car model: {ex.Message}");
         }
     }
 }

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson.IO;
 using MongoDB.Driver;
 using System.Threading.Tasks;
-
+using MongoDB.Bson.Serialization;
 
 public class CarService : ICarService
 {
@@ -99,6 +99,8 @@ public class CarService : ICarService
     {
         try
         {
+            var jsonFilter = filter.Render(BsonSerializer.SerializerRegistry.GetSerializer<Car>(), BsonSerializer.SerializerRegistry);
+            _logger.LogInformation($"Generated Filter: {jsonFilter}");
             var result = await _carCollection.Find(filter).ToListAsync();
             return result;
         }

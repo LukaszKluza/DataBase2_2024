@@ -1,19 +1,15 @@
-@page "/cars"
+@page "/models/{ModelId}"
 @inject HttpClient HttpClient
 @using System.Text.Json
 @using System.Net.Http.Json
 
 <PageTitle>Cars</PageTitle>
 
-<h1>This is list of available cars.</h1>
+<h1>This is list of available cars for this Model:</h1>
 
 @if (cars == null)
 {
-    <p>Loading...</p>
-}
-else if (cars.Count == 0)
-{
-    <p>No cars available.</p>
+     <p>No cars available for this model.</p>
 }
 else
 {
@@ -21,24 +17,68 @@ else
         @foreach (var car in cars)
         {
             <li>
-                <a href="cars/@car._id">@car.Type - @car.Color</a>
+                <a href="models/@ModelId/@car._id">
+                    <div class="car-details">
+                        <div class="car-type">Type: @car.Type</div>
+                        <div class="car-color">Color: @car.Color</div>
+                        <div class="car-seats">Seats: @car.Seats</div>
+                        <div class="car-price">Price per day: @car.Price_per_day</div>
+                    </div>
+                </a>
             </li>
         }
     </ul>
 }
 
 @code {
+    [Parameter]
+    public string ModelId { get; set; }
+
     private List<Car> cars;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            cars = await HttpClient.GetFromJsonAsync<List<Car>>("http://localhost:5000/api/car/Cars");
+            var url = $"http://localhost:5000/api/car/Cars?modelId={ModelId}&isAvailable=true";
+            cars = await HttpClient.GetFromJsonAsync<List<Car>>(url);
         }
         catch (Exception ex)
         {
             Console.WriteLine($"An error occurred: {ex.Message}");
         }
     }
+
 }
+
+<style>
+    .car-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .car-list li {
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+        transition: transform 0.3s;
+    }
+
+    .car-list li:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .car-details {
+        font-size: 16px;
+    }
+
+    .car-type {
+        font-weight: bold;
+    }
+
+    .car-color, .car-seats, .car-price {
+        margin-top: 5px;
+    }
+</style>
