@@ -37,6 +37,7 @@ public class Startup
         services.AddScoped<ICarsModelsService, CarsModelsService>();
         services.AddScoped<IRentalService, RentalService>();
         services.AddScoped<IClientService, ClientService>();
+        services.AddScoped<IStatisticsService, StatisticsService>();
 
         services.AddScoped<IMongoCollection<Car>>(provider =>
         {
