@@ -123,7 +123,7 @@ public class CarController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"An error occurred while retrieving cars:: {ex.Message}");
+            return StatusCode(500, $"An error occurred while retrieving cars: {ex.Message}");
         }
     }
 

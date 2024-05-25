@@ -9,22 +9,45 @@ using System.Threading.Tasks;
 public class RentalService : IRentalService
 {
     private readonly IMongoCollection<Rental> _rentalCollection;
+    private readonly ICarService _carService;
     private readonly ILogger<RentalService> _logger;
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1,1);
 
-    public RentalService(IMongoCollection<Rental> rentalCollection, ILogger<RentalService> logger)
+    public RentalService(IMongoCollection<Rental> rentalCollection, ICarService carService, ILogger<RentalService> logger)
     {
         _rentalCollection = rentalCollection;
+        _carService = carService;
         _logger = logger;
     }
     public async Task CreateRentalAsync(Rental rental)
     {
+        await _semaphore.WaitAsync();
         try
         {
             _logger.LogInformation("Attempting to create rental model: {@Rental}", rental);
-            if(_rentalCollection == null)
+            if (rental == null)
             {
-                _logger.LogError("Rentals models collection is null");
-                return;
+                _logger.LogError("Rental model is null");
+                throw new ArgumentNullException(nameof(rental), "Rental model cannot be null");
+            }
+
+            var clientID = rental.Customer.ClientId;
+            var carID = rental.Rental_Car.carId;
+            Car car = await _carService.GetCarByIdAsync(carID);
+
+            if(car == null){
+                _logger.LogWarning($"Car with ID '{carID}' not found.");
+                throw new KeyNotFoundException($"Car does not exist.");
+            }
+            if(!car.IsAvailable){
+                _logger.LogWarning($"Car with ID '{carID}' is not available.");
+                throw new KeyNotFoundException($"Car does not available.");
+            }
+            
+            var res = await _carService.UpdateCarAvailabilityByIdAsync(carID, false);
+            if (!res){
+                _logger.LogWarning($"Error: UpdateCarAvailabilityByIdAsync()");
+                throw new KeyNotFoundException($"Error: UpdateCarAvailabilityByIdAsync()");
             }
             await _rentalCollection.InsertOneAsync(rental);
             _logger.LogInformation("Rental model created successfully: {@Rental}", rental);
@@ -33,6 +56,10 @@ public class RentalService : IRentalService
         {
             _logger.LogError(ex, "An error occured while creating the rental");
             throw;
+        }
+        finally
+        {
+            _semaphore.Release();
         }
     }
 
@@ -86,4 +113,23 @@ public class RentalService : IRentalService
             throw;
         }
     }
+    // private async void CheckNewRentalAsync(Rental rental)
+    // {
+    //     try
+    //     {
+    //         _logger.LogInformation("Attempting to create rental model: {@Rental}", rental);
+    //         if(_rentalCollection == null)
+    //         {
+    //             _logger.LogError("Rentals models collection is null");
+    //         }
+    //         await _rentalCollection.InsertOneAsync(rental);
+    //         _logger.LogInformation("Rental model created successfully: {@Rental}", rental);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "An error occured while creating the rental");
+    //         throw;
+    //     }
+    // }
+
 }

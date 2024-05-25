@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson.IO;
 using MongoDB.Driver;
-using System.Threading.Tasks;
 using MongoDB.Bson.Serialization;
 
 public class CarService : ICarService
@@ -116,6 +113,26 @@ public class CarService : ICarService
         var filter = Builders<Car>.Filter.Eq(car => car._id, id);
         var car = await _carCollection.Find(filter).FirstOrDefaultAsync();
         return car;
-    }
+    }    
+    public async Task<bool> UpdateCarAvailabilityByIdAsync(int id, bool availability){
+        try
+        {
+            var car = await GetCarByIdAsync(id);
 
+            if (car == null)
+            {
+                return false;
+            }
+
+            car.IsAvailable = availability;
+            var updateResult = await UpdateCarAsync(id, car);
+
+            return updateResult;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Wystąpił błąd podczas aktualizacji samochodu: {ex.Message}");
+            return false;
+        }
+    }
 }

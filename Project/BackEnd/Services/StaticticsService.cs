@@ -117,7 +117,7 @@ public class StatisticsService : IStatisticsService
                 })
                 .Project(new BsonDocument
                 {
-                    { "_id", 0 }, // 0 to wyłączenie pola _id z wyników
+                    { "_id", 0 },
                     { "customer", "$_id" },
                     { "filteredCars", new BsonDocument
                         {
